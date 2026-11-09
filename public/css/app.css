@@ -312,6 +312,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 .uibutton.red   { background: #ff0160; }
 .uibutton.gold  { background: #f9c329; color: #4a3200; }
 .uibutton.ghost { background: #202124; }
+/* Ghost buttons are only ever briefly disabled (Skip while Santa is talking),
+   so they stay solid rather than fading. */
+.uibutton.ghost:disabled { opacity: 1; cursor: default; }
 .uibutton.small { font-size: 14px; padding: 8px 18px; --height: 5px; }
 
 /* --- dialogs (Santa Tracker's `santa-overlay`) ---------------------------
