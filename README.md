@@ -195,6 +195,18 @@ Press `D` to hide or show the panel. The `/api/dev/*` endpoints behind it need
 no token, so **unset `DEV_TOOLS` before the real run**: anyone who can reach
 the site could reset the pool otherwise. The preview deployment has it on.
 
+### Backups
+
+`scripts/backup.sh` saves everything in the pool (names, codes, answers,
+hints and, after the draw, the assignments) to a timestamped JSON file:
+
+```bash
+ADMIN_TOKEN=your-token ./scripts/backup.sh ~/Desktop
+```
+
+Run it now and then, and certainly on 1 December. The files hold everyone's
+sign-in codes, so keep them private; `backups/` in the repo is git-ignored.
+
 ### Admin
 
 Only if `ADMIN_TOKEN` is set. Useful if you want to draw early or start over.
