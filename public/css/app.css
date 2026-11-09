@@ -784,7 +784,11 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
 .chat-progress { height: 4px; background: rgba(0, 0, 0, .25); border-radius: 100px; overflow: hidden; margin: 8px 2px 2px; flex: none; }
 .chat-progress i { display: block; height: 100%; background: #f9c329; width: 0; transition: width .4s ease-in-out; }
 
-.chat-input { display: flex; gap: 8px; align-items: flex-end; margin: 10px 2px 2px; flex: none; }
+/* The row is a fixed height whatever it holds (input, or Continue at the
+   end), and the chips row always takes its space, so the panel never changes
+   height mid-conversation and Santa stays put beside it. */
+.chat-input { display: flex; gap: 8px; align-items: center; justify-content: center; margin: 10px 2px 2px; flex: none; min-height: 54px; }
+.chat-input .uibutton.red:not(#chat-send) { margin: 0 6px; }
 .chat-input textarea {
   flex-grow: 1;
   border: 0;
@@ -802,8 +806,7 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
 .chat-input textarea:focus { outline: 2px solid rgba(0, 0, 0, .25); }
 .chat-input textarea:disabled { background: #e3e7e8; }
 
-.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 2px 0; flex: none; }
-.chips:empty { display: none; margin: 0; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 2px 0; flex: none; min-height: 34px; }
 .chips button {
   border: 0;
   background: #fff;
