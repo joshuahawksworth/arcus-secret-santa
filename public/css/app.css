@@ -154,6 +154,14 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   pointer-events: none;
 }
 
+.titleblock .brand {
+  width: 84px;
+  height: 84px;
+  display: block;
+  margin: 0 auto 6px;
+  filter: drop-shadow(0 2px 0 rgba(255, 255, 255, .6));
+}
+
 .titleblock h1 {
   font-size: clamp(34px, 6.5vw, 72px);
   line-height: .75em;
@@ -717,23 +725,42 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
 /* --- the chat ----------------------------------------------------------- */
 
 /* Santa sits to the right of the conversation, feet on the same baseline. */
+/* Santa stands at the bottom of the screen, big, his body running off the
+   bottom edge; the conversation sits beside him, centred, never over him. */
+#screen-chat .backdrop { padding-bottom: 0; align-items: stretch; }
 .chat-dialog {
   flex-flow: row;
   align-items: flex-end;
   justify-content: center;
-  gap: 0;
-  width: min(1180px, 100%);
+  gap: 24px;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
 }
-/* The conversation gets first claim on the width; Santa fits beside it. */
-.chat-main { flex: 1 1 680px; min-width: 0; max-width: 760px; display: flex; flex-flow: column; max-height: 100%; }
-.chat-main .sheet { min-height: 396px; }   /* 900em at .44px: Santa's frame height */
-.chat-santa { flex: 0 1 auto; display: flex; align-items: flex-end; min-width: 0; }
+.chat-main {
+  flex: 0 1 min(760px, 58vw);
+  min-width: 0;
+  display: flex;
+  flex-flow: column;
+  align-self: center;
+  max-height: calc(100% - 32px);
+  position: relative;
+  z-index: 2;              /* the panel sits over Santa's far shoulder, never the other way round */
+}
+.chat-santa { flex: none; display: flex; align-items: flex-end; }
+/* Sized from the viewport: as tall as the screen allows, but never so wide
+   that he and the panel will not both fit. The frame is only the face's
+   width; the suit overflows it on both sides so the shoulders keep their
+   curve, and runs off the bottom of the screen. */
 .chat-santa .santa-window {
-  font-size: .44px;
-  margin-bottom: 0;       /* his frame ends exactly where the panel does */
-  margin-right: -70px;    /* his shoulder tucks behind the panel's edge */
-  max-width: 34vw;
+  --santa-em: min(calc(88vh / 900), calc((42vw - 60px) / 760));
+  font-size: max(.36px, var(--santa-em));
+  width: 760em;
+  margin-bottom: 0;
+  overflow: visible;
 }
+.chat-santa .santa-figure { left: -146em; }   /* centre the face (at 526em) in the 760em frame */
 
 .chat-title { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; }
 .chat-title h1 { margin: 0 0 10px; text-align: left; }
@@ -1147,10 +1174,17 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
 /* --- responsive --------------------------------------------------------- */
 
 @media (max-width: 900px) {
-  .chat-dialog { flex-flow: column; align-items: stretch; gap: 0; }
-  .chat-main { max-width: none; flex-basis: auto; }
-  .chat-santa { justify-content: flex-start; margin-bottom: -16px; margin-left: 6px; position: relative; z-index: 1; }
-  .chat-santa .santa-window { font-size: .2px; margin-bottom: 0; margin-right: 0; max-width: none; }
+  /* Stacked: Santa top-left with the title beside his head, the panel below
+     him with his shoulders tucked behind its top edge. */
+  #screen-chat .backdrop { padding-bottom: 10px; align-items: center; }
+  .chat-dialog { flex-flow: column; align-items: stretch; gap: 0; height: auto; position: relative; }
+  .chat-main { max-width: none; flex-basis: auto; align-self: stretch; max-height: none; }
+  .chat-santa { justify-content: flex-start; margin-bottom: -28px; margin-left: 2px; position: relative; z-index: 1; }
+  .chat-santa .santa-window { font-size: .2px; margin-bottom: 0; width: 760em; height: 760em; overflow: hidden; }
+  .chat-santa .santa-figure { bottom: -220em; }   /* just head and shoulders in the small frame */
+  /* The title row floats above the panel, to the right of Santa's head. */
+  .chat-title { position: absolute; top: -112px; left: 166px; right: 0; padding: 0; z-index: 3; align-items: flex-start; }
+  .chat-title h1 { margin-bottom: 0; }
   .chat-title h1 { font-size: 30px; line-height: 30px; }
   .chat-log { height: 36vh; }
 }
