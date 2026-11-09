@@ -1,0 +1,5 @@
+node_modules/
+data/pool.json
+data/*.tmp
+*.log
+.DS_Store

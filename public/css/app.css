@@ -1,0 +1,1096 @@
+/* ---------------------------------------------------------------------------
+ * App shell.
+ *
+ * The button styles (#play / .uibutton / .featured-button), the page
+ * transition (.interlude) and Santa himself (.santa-*) are lifted from Google
+ * Santa Tracker (Apache-2.0): the village scene's inline stylesheet, the
+ * `santa-interlude` element, and the `santaselfie` scene respectively.
+ * ------------------------------------------------------------------------ */
+
+/* --- reset / single non-scrolling section -------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;              /* one section, never scrolls */
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: "Google Sans", "Roboto", Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg, #00C1F2 0%, #B4E5E6 17.71%, #FFF8BD 41.67%);
+  color: #fff;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+input, textarea, button, select { font-family: inherit; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+
+/* --- the village stage ---------------------------------------------------- */
+
+/* The scene is always laid out at its native 1920x1050 and then scaled to
+   cover the viewport, anchored to the bottom centre. That keeps every elf
+   lined up with the painted village at any window size. */
+#stage {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  width: 1920px;
+  height: 1050px;
+  transform: translateX(-50%) scale(var(--stage-scale, 1));
+  transform-origin: bottom center;
+  background: linear-gradient(180deg, #00C1F2 0%, #B4E5E6 17.71%, #FFF8BD 41.67%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#weather { position: absolute; inset: 0; z-index: 2; }
+#weather canvas { display: block; }
+
+.village-scene .village { z-index: 1; }
+
+/* Santa's sleigh is not part of this app, and neither is the retro arcade
+   building's hotspot: the village art stays, the links do not. */
+.village .layer4 .retro { display: none; }
+
+/* --- page transition ----------------------------------------------------- */
+
+/* Straight from `santa-interlude`: four coloured layers slide up over the
+   screen one after another, then keep travelling upwards and off. */
+.interlude {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  visibility: hidden;
+}
+.interlude.busy { visibility: visible; }
+
+.interlude .layer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform .75s ease-in-out, opacity .5s ease-in;
+  transform: translateY(100%);
+  transition-timing-function: cubic-bezier(0.645, 0, 0.785, 0.39);
+}
+.interlude .layer-0 { background: #6bb4fd; transition-delay: .5s; }
+.interlude .layer-1 { background: #f33;    transition-delay: .3333333333s; }
+.interlude .layer-2 { background: #1a844b; transition-delay: .1666666667s; }
+.interlude .layer-3 { background: #f9c329; transition-delay: 0s; }
+
+.interlude.direction .layer { transform: translateY(-100%); }
+
+.interlude.active .layer { transform: translate(0) !important; transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+.interlude.active .layer-0 { transition-delay: 0s; }
+.interlude.active .layer-1 { transition-delay: .1666666667s; }
+.interlude.active .layer-2 { transition-delay: .3333333333s; }
+.interlude.active .layer-3 { transition-delay: .5s; }
+
+/* --- screens ------------------------------------------------------------- */
+
+#screens {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  pointer-events: none;
+}
+.screen.current { display: flex; }
+
+/* Screens arrive from the bottom, the same direction the interlude travels. */
+.screen.current > * { animation: screen-rise .6s cubic-bezier(0.215, 0.61, 0.355, 1) both; }
+
+@keyframes screen-rise {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.screen > *, .screen button, .screen a { pointer-events: auto; }
+
+/* --- home ---------------------------------------------------------------- */
+
+/* Clear of the top bar, and high enough that the copy sits over sky rather
+   than over the busiest part of the village. */
+#screen-home { justify-content: flex-start; padding-top: max(7vh, 72px); }
+
+.titleblock {
+  text-align: center;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  position: relative;
+  max-width: 680px;
+}
+
+/* The decorative wreath that sits behind the village title. */
+.ornament {
+  background: url(../img/village/ornament.svg) 50% 20% no-repeat;
+  background-size: contain;
+  width: 450px;
+  height: 250px;
+  margin-top: -40px;
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.titleblock h1 {
+  font-size: clamp(34px, 6.5vw, 72px);
+  line-height: .75em;
+  margin: 6px 12px;
+  font-family: "Lobster", cursive;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .25);
+  transform: rotateZ(-3deg) skew(-4deg);
+  font-weight: 400;
+}
+
+.titleblock > p {
+  font-weight: 500;
+  font-size: clamp(14px, 1.4vw, 20px);
+  line-height: 1.35em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .33), 0 1px 3px rgba(0, 0, 0, .2);
+  max-width: 440px;
+  padding: 0 1em .5em;
+  margin: 14px 0 0;
+}
+
+.home-actions {
+  margin-top: 26px;
+  display: flex;
+  flex-flow: row wrap;
+  gap: 22px 44px;
+  align-items: center;
+  justify-content: center;
+}
+.home-secondary { display: flex; flex-flow: column; gap: 10px; align-items: center; }
+
+/* One readable strip for the pool status, so it holds up over the village. */
+.statusline {
+  margin-top: 24px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(0, 0, 0, .55);
+  border-radius: 14px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 100%;
+}
+.statusline span:empty { display: none; }
+.statusline #home-when, .statusline #home-closed { font-size: 13px; }
+
+/* --- buttons (Santa Tracker's #play and .uibutton) ----------------------- */
+
+.playbutton {
+  background-color: transparent;
+  border: 0;
+  pointer-events: auto;
+  border-radius: 10000px;
+  width: 150px;
+  height: 150px;
+  color: #fff;
+  font-weight: 400;
+  font-family: "Lobster", cursive;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .05);
+  font-size: 27px;
+  transform: translateZ(0);
+  word-wrap: break-word;
+  letter-spacing: -1px;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  outline: none;
+}
+.playbutton span {
+  display: inline-block;
+  transform: rotate(-5deg) translate(-5px, -5px);
+  transition: transform .25s ease-in-out;
+  line-height: 1.05em;
+}
+.playbutton::before, .playbutton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10000px;
+}
+.playbutton::before {
+  background: #ff0160;
+  border: 4px solid transparent;
+  box-shadow: 3px 3px 0 1px #e70058, 5px 5px #e70058, 13px 13px rgba(0, 0, 0, .1);
+  transform: translate(-5px, -5px);
+  z-index: -1;
+  transition: box-shadow .25s ease-in-out, transform .25s ease-in-out;
+}
+.playbutton:focus-visible::before { border-color: rgba(0, 0, 0, .25); }
+.playbutton::after {
+  inset: -5px;
+  background: #fff;
+  box-shadow: 0 0 0 11px rgba(0, 0, 0, .05), 0 0 0 1px rgba(0, 0, 0, .05);
+  transition: box-shadow 0s ease-out;
+  z-index: -2;
+}
+.playbutton:hover::before {
+  box-shadow: 3px 3px 0 1px #e70058, 7px 7px #e70058, 18px 18px rgba(0, 0, 0, .1);
+  transform: translate(-7px, -7px);
+}
+.playbutton:hover span { transform: rotate(-5deg) translate(-7px, -7px); }
+.playbutton:active::before {
+  box-shadow: 0 0 #e70058, 0 0 #e70058, 0 0 rgba(0, 0, 0, .1);
+  transform: translate(0, 0);
+  transition-duration: .15s;
+}
+.playbutton:active span { transform: rotate(-5deg); transition-duration: .15s; }
+.playbutton:active::after {
+  box-shadow: 0 0 0 11px rgba(0, 0, 0, .05), 0 0 0 25px rgba(0, 0, 0, 0);
+  transition-duration: .3s;
+}
+.playbutton[disabled] { opacity: .55; cursor: not-allowed; }
+
+/* The same button in the site's Christmas green (the shell colour). */
+.playbutton.green::before {
+  background: #1a844b;
+  box-shadow: 3px 3px 0 1px #136a3b, 5px 5px #136a3b, 13px 13px rgba(0, 0, 0, .1);
+}
+.playbutton.green:hover::before { box-shadow: 3px 3px 0 1px #136a3b, 7px 7px #136a3b, 18px 18px rgba(0, 0, 0, .1); }
+.playbutton.green:active::before { box-shadow: 0 0 #136a3b, 0 0 #136a3b, 0 0 rgba(0, 0, 0, .1); }
+
+.uibutton {
+  cursor: pointer;
+  position: relative;
+  pointer-events: auto;
+  border: 0;
+  color: #fff;
+  --_shadow: var(--shadow, 4px);
+  --_height: var(--height, 8px);
+  --_hover: var(--hover, 4px);
+  --_duration: var(--duration, .2s);
+  background: #6bb4fd;
+  transition: transform var(--_duration);
+  transform: translateY(0);
+  border-radius: 1000px;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 11px 24px;
+}
+.uibutton:disabled { opacity: .5; cursor: not-allowed; }
+.uibutton:hover:not(:disabled) { transform: translateY(calc(-1 * var(--_hover))); }
+.uibutton::after, .uibutton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: inherit;
+}
+.uibutton::after { border: 2px solid transparent; background: inherit; z-index: -10; }
+.uibutton::before {
+  background: inherit;
+  transition: box-shadow var(--_duration), transform var(--_duration);
+  transform: translateY(var(--_height));
+  z-index: -100;
+  box-shadow: inset 0 -20px 0 rgba(0, 0, 0, .3), var(--_shadow) var(--_shadow) rgba(0, 0, 0, .1);
+}
+.uibutton:hover:not(:disabled)::before {
+  --_shadow-extra: calc(var(--_shadow) + var(--_hover) * 0.5);
+  transform: translateY(var(--_height)) translateY(var(--_hover));
+  box-shadow: inset 0 -20px 0 rgba(0, 0, 0, .3), var(--_shadow-extra) var(--_shadow-extra) rgba(0, 0, 0, .1);
+}
+.uibutton:focus { outline: 0; }
+.uibutton:focus-visible::after { border-color: rgba(0, 0, 0, .4); }
+.uibutton:active:not(:disabled) { transform: translateY(var(--_height)); }
+.uibutton:active:not(:disabled)::before {
+  transform: translateY(0);
+  box-shadow: inset 0 -20px 0 rgba(0, 0, 0, .3), 0 0 rgba(0, 0, 0, .1);
+}
+.uibutton.green { background: #1a844b; }
+.uibutton.red   { background: #ff0160; }
+.uibutton.gold  { background: #f9c329; color: #4a3200; }
+.uibutton.ghost { background: rgba(0, 0, 0, .28); }
+.uibutton.small { font-size: 14px; padding: 8px 18px; --height: 5px; }
+
+/* --- dialogs (Santa Tracker's `santa-overlay`) ---------------------------
+ * Same structure the site uses for its game-over / share overlays: a dimming
+ * backdrop with a content block that springs in, and slides up and out of the
+ * top when dismissed. Timings and easings are the originals.
+ * ---------------------------------------------------------------------- */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-flow: column;
+  z-index: 11;
+  background: rgba(0, 0, 0, .5);
+  transition: opacity .4s ease-in-out;
+  padding: 16px;
+}
+
+.dialog {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transform: translate(0);
+  transition: transform .4s cubic-bezier(0, 1.52, 0.295, 0.86);
+  font-family: "Google Sans", "Arial", sans-serif;
+  width: min(620px, 100%);
+  max-height: 100%;
+}
+
+.screen.leaving .backdrop { opacity: 0; transition-duration: .6s; }
+.screen.leaving .dialog { transform: translateY(-100vh); transition-timing-function: cubic-bezier(0.83, 0.02, 1, 0.01); }
+
+/* The site's `.hero h1`. */
+.dialog h1 {
+  text-align: center;
+  color: #fff;
+  line-height: 42px;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  margin: 0 0 14px;
+  text-shadow: 1px 2px 0 rgba(0, 0, 0, .13);
+  font-family: Lobster, cursive;
+}
+
+/* The site's `nav`: a translucent white block over the scene. */
+.sheet {
+  pointer-events: auto;
+  background: #1a844b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 12px;
+  position: relative;
+  width: 100%;
+  min-width: 240px;
+  overflow: hidden;
+}
+
+.sheet h4 {
+  color: #fff;
+  font-size: 13px;
+  line-height: 2em;
+  font-weight: 800;
+  margin: -4px 0 2px;
+  text-transform: uppercase;
+}
+
+.sheet-scroll { overflow-y: auto; max-height: min(58vh, 460px); padding: 2px; }
+
+.sheet p { color: #fff; font-size: 14px; line-height: 1.55; margin: 4px 10px 10px; text-shadow: 0 1px 0 rgba(0, 0, 0, .2); }
+.sheet p.quiet { opacity: .8; font-size: 13px; }
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 1em 0 0;
+  transition: opacity .4s, transform .4s;
+}
+.screen.leaving .dialog-actions { opacity: 0; transform: translateY(50%); }
+
+/* --- fields (the site's `nav .url input`) -------------------------------- */
+
+.field { text-align: left; margin: 0 2px 10px; }
+.field label {
+  display: block;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .2);
+  margin: 4px 4px 4px;
+}
+.field input[type=text], .field textarea, .field select {
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  padding: 9px 12px;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, .125);
+  box-sizing: border-box;
+  background: #fff;
+  color: #000;
+  transition: background .25s, color .25s;
+}
+.field textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: 2px solid rgba(0, 0, 0, .25); }
+.field .sub { color: #fff; font-size: 12px; opacity: .8; margin: 5px 4px 0; }
+.field.code input { text-align: center; letter-spacing: 6px; text-transform: uppercase; font-size: 22px; font-weight: 500; }
+
+/* --- notices (the site's `santa-notice`) -------------------------------- */
+
+.notice {
+  box-sizing: border-box;
+  color: #fff;
+  padding: 4px;
+  font-size: 14px;
+  display: none;
+  flex-flow: column;
+  align-items: center;
+  max-width: 400px;
+  background-color: #202124;
+  opacity: .97;
+  backdrop-filter: blur(2px);
+  border-radius: 4px;
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12);
+  overflow: hidden;
+  margin: 0 auto 12px;
+}
+.notice.shown { display: flex; }
+.notice p { flex-grow: 1; margin: 8px 16px 8px; text-align: center; }
+.notice .linkbutton { color: #3fc4ff; }
+
+.linkbutton {
+  text-decoration: none;
+  display: inline-block;
+  min-width: 80px;
+  margin: 0 4px;
+  padding: 6px 12px;
+  border-radius: 200px;
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  background: transparent;
+  transition: background .25s;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 13px;
+}
+.linkbutton:hover { background: rgba(255, 255, 255, .2); }
+.dialog > .dialog-actions .linkbutton, .chat-head .linkbutton { text-shadow: 0 1px 2px rgba(0, 0, 0, .5); }
+.linkbutton:focus-visible { border-color: rgba(255, 255, 255, .5); outline: none; }
+
+/* --- cards (the site's `santa-card`) ------------------------------------ */
+
+.card {
+  background: var(--color, #2a57ad);
+  border-radius: var(--radius, 16px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+  overflow: hidden;
+  text-align: center;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transform: translate(0);
+  transition: transform .16s, box-shadow .16s;
+  color: #fff;
+  position: relative;
+}
+button.card { border: 0; cursor: pointer; font: inherit; }
+button.card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0, 0, 0, .3); }
+button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
+
+/* The village module palette, used for the name cards and chat bubbles. */
+.c-blue   { --color: #6bb4fd; }
+.c-green  { --color: #1a844b; }
+.c-pink   { --color: #ff0160; }
+.c-gold   { --color: #f9c329; color: #4a3200; }
+.c-violet { --color: #5203c0; }
+.c-cyan   { --color: #00c1f2; }
+.c-rose   { --color: #fdb0ca; color: #5a2233; }
+.c-purple { --color: #6900ff; }
+.c-steel  { --color: #8ab8d4; }
+.c-sky    { --color: #3499ff; }
+
+/* --- Santa (from the santaselfie scene) ---------------------------------
+ * A window on to the full Santa figure, cropped to head and shoulders. Every
+ * inner measurement is the scene's own `em` value, so font-size on
+ * .santa-window is the only scale dial. He is nowhere near the size he is on
+ * santaselfie.html, and the barber tools, backdrop and beard canvas are gone:
+ * here he only sits, breathes, blinks and talks.
+ * ---------------------------------------------------------------------- */
+
+.santa-window {
+  position: relative;
+  overflow: hidden;
+  flex: none;
+  font-size: .19px;
+  width: 620em;
+  height: 900em;
+}
+
+/* Offsets chosen so the window frames head, beard and shoulders: the beard
+   hangs ~220em below the face, so the figure sits lower than the face alone
+   would need. */
+.santa-figure { position: absolute; left: -215em; bottom: -80em; width: 1052em; height: 1000em; }
+
+/* The scene centres the beard canvas on the face; its pixel size is set in JS
+   from the computed `em`, so one canvas unit stays one scene unit. */
+.beard { left: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); }
+
+.Body {
+  animation: breathing 3s infinite;
+  background: url(../img/santa/body.svg) 0 0/contain no-repeat;
+  bottom: -589.12em;
+  height: 1068em;
+  position: absolute;
+  width: 1052em;
+}
+.Face {
+  background: url(../img/santa/face.svg) 0 0/contain no-repeat;
+  bottom: 420em;
+  height: 497em;
+  left: 247em;
+  position: absolute;
+  width: 558em;
+}
+.eye {
+  background: url(../img/face/eye.svg) 0 0/contain no-repeat;
+  height: 35em; width: 35em;
+  position: absolute; top: 145em;
+  transform: translateZ(0);
+}
+.eye--left { left: 164em; }
+.eye--right { right: 164em; }
+.eye--blink { background: url(../img/face/eye--blink.svg) 50%/contain no-repeat; }
+.Face--delighted .eye, .eye--closed { background: url(../img/face/eye--closed.svg) 50%/contain no-repeat; }
+
+.eyebrow {
+  background-color: #fff;
+  border-radius: 8em;
+  height: 22em; width: 93em;
+  position: absolute; top: 95em;
+  transform: translateZ(0);
+  transition: top, transform .3s;
+}
+.eyebrow--left { left: 132em; }
+.eyebrow--right { right: 132em; }
+.Face--delighted .eyebrow, .Face--alarmed .eyebrow, .eyebrow--raised { animation: raiseEyebrow .6s ease normal; }
+.Face--sad .eyebrow--left { transform: rotate(-45deg); transition: transform .3s; }
+.Face--sad .eyebrow--right { transform: rotate(45deg); transition: transform .3s; }
+
+.cheek {
+  background: url(../img/face/cheek.png) 0 0/contain no-repeat;
+  height: 150em; width: 150em;
+  opacity: 0;
+  position: absolute; top: 160em;
+  transition: opacity 1s;
+}
+.cheek--left { left: 60em; }
+.cheek--right { right: 60em; }
+.Face--delighted .cheek, .cheek--show { opacity: 1; transition: opacity 1s; }
+
+.nose {
+  background: url(../img/face/nose.svg) 0 0/contain no-repeat;
+  height: 104em; width: 127em;
+  left: 215.5em;
+  position: absolute; top: 170em;
+  transform: translateZ(0);
+  transition: transform .3s;
+}
+
+.mouth { left: 234em; pointer-events: none; position: absolute; top: 295em; transform: translateZ(0); }
+.Face--happy .mouth, .Face--delighted .mouth, .mouth--smile {
+  background: url(../img/face/mouth--smile.svg) 0 0/contain no-repeat;
+  height: 45em; width: 90em;
+}
+.Face--talking .mouth, .mouth--open {
+  background: url(../img/face/mouth--breath.svg) 0 0/contain no-repeat;
+  height: 57em; width: 57em;
+  left: 250.5em;
+}
+.Face--sad .mouth { background: url(../img/face/mouth--smile.svg) 0 0/contain no-repeat; height: 45em; width: 90em; transform: scaleY(-1); }
+
+@keyframes breathing {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(-7em); }
+  72%  { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+@keyframes raiseEyebrow {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(-20em); }
+  70%  { transform: translateY(-20em); }
+  100% { transform: translateY(0); }
+}
+
+/* --- the elf code ------------------------------------------------------- */
+
+/* The site's copyable share field: click to copy, inverting while it does. */
+.codebox { position: relative; }
+.codebox input {
+  cursor: copy;
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 26px;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 8px;
+  padding: 10px 4px;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, .125);
+  box-sizing: border-box;
+  background: #fff;
+  color: #000;
+  transition: background .25s, color .25s;
+}
+.codebox input.copy { transition: none; background: #000; color: #fff; }
+
+/* --- misc --------------------------------------------------------------- */
+
+/* The site's own chrome header: a soft gradient so controls read over the sky. */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 700;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  pointer-events: none;
+  border-top: 20px solid transparent;
+  padding-left: 5%;
+  padding-right: 5%;
+  height: 44px;
+}
+.topbar::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+.topbar > * { pointer-events: auto; position: relative; }
+
+@media (max-width: 767px) {
+  .topbar { border-top: 10px solid transparent; padding-left: 10px; padding-right: 10px; }
+  .topbar::before { top: -10px; }
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+[hidden] { display: none !important; }
+
+/* --- the chat ----------------------------------------------------------- */
+
+/* Santa sits to the right of the conversation, feet on the same baseline. */
+.chat-dialog {
+  flex-flow: row;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  width: min(960px, 100%);
+}
+.chat-main { flex: 1 1 auto; min-width: 0; display: flex; flex-flow: column; max-height: 100%; }
+.chat-santa { flex: none; display: flex; align-items: flex-end; }
+.chat-santa .santa-window { font-size: .44px; margin-bottom: -8px; }
+
+.chat-title { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; }
+.chat-title h1 { margin: 0 0 10px; text-align: left; }
+.chat-title .linkbutton { margin-bottom: 10px; }
+
+.chat-main .sheet { text-align: left; }
+
+.chat-log {
+  overflow-y: auto;
+  flex-grow: 1;
+  display: flex;
+  flex-flow: column;
+  gap: 8px;
+  min-height: 160px;
+  max-height: min(48vh, 400px);
+  padding: 4px 2px;
+}
+
+/* Santa's lines on white, the person's on the site's pink: both solid. */
+.bubble {
+  max-width: 86%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  animation: bubble-in .4s cubic-bezier(0, 1.52, 0.295, 0.86) both;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+}
+.bubble.santa { background: #fff; color: #202124; align-self: flex-start; border-bottom-left-radius: 4px; }
+.bubble.me { background: #ff0160; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.bubble.typing { display: flex; gap: 5px; align-items: center; padding: 14px; }
+.bubble.typing u { width: 8px; height: 8px; border-radius: 16px; animation: loader-move 1.6s cubic-bezier(.5, .1, .5, 1) infinite; }
+/* The site's own loader: four dots in its four colours, taking turns to hop. */
+.bubble.typing u:nth-child(1) { background: #9fceff; animation-delay: -.8s; }
+.bubble.typing u:nth-child(2) { background: #ffb1b1; animation-delay: -.6s; }
+.bubble.typing u:nth-child(3) { background: #fff173; animation-delay: -.4s; }
+
+@keyframes bubble-in {
+  from { transform: translateY(16px) scale(.96); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes loader-move { 50% { transform: translateY(-100%); } }
+
+.chat-progress { height: 4px; background: rgba(0, 0, 0, .25); border-radius: 100px; overflow: hidden; margin: 8px 2px 2px; flex: none; }
+.chat-progress i { display: block; height: 100%; background: #f9c329; width: 0; transition: width .4s ease-in-out; }
+
+.chat-input { display: flex; gap: 8px; align-items: flex-end; margin: 10px 2px 2px; flex: none; }
+.chat-input textarea {
+  flex-grow: 1;
+  border: 0;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 15px;
+  padding: 11px 13px;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, .125);
+  background: #fff;
+  color: #000;
+  resize: none;
+  min-height: 44px;
+  max-height: 110px;
+}
+.chat-input textarea:focus { outline: 2px solid rgba(0, 0, 0, .25); }
+.chat-input textarea:disabled { background: #e3e7e8; }
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 2px 0; flex: none; }
+.chips:empty { display: none; margin: 0; }
+.chips button {
+  border: 0;
+  background: #fff;
+  color: #1a844b;
+  border-radius: 200px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+  transition: transform .16s, box-shadow .16s;
+}
+.chips button:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0, 0, 0, .3); }
+
+/* --- the raffle drum ---------------------------------------------------- */
+
+.reel-wrap { position: relative; width: min(560px, 100%); margin-top: 22px; }
+.reel-wrap > .notice { margin-bottom: 10px; max-width: none; }
+
+/* The frame: the site's shell green, deep inside, candy-cane rails top and
+   bottom. Tickets scroll through the window behind the centre marker. */
+.reel {
+  --ticket-gap: 10px;
+  --reel-blur: 0px;
+  position: relative;
+  width: 100%;
+  height: clamp(170px, 26vh, 250px);
+  border-radius: 18px;
+  background: #136a3b;
+  box-shadow: 0 10px 0 rgba(0, 0, 0, .14), 0 18px 40px rgba(0, 0, 0, .3), inset 0 0 0 4px #1a844b;
+  overflow: hidden;
+}
+.reel::before, .reel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: repeating-linear-gradient(-45deg, #ff0160 0 10px, #fff 10px 20px);
+  z-index: 4;
+}
+.reel::before { top: 0; box-shadow: 0 3px 0 #e70058; }
+.reel::after  { bottom: 0; box-shadow: 0 -3px 0 #e70058; }
+
+.reel-window {
+  position: absolute;
+  inset: 12px 0;
+  --ticket-gap: 10px;
+  filter: blur(var(--reel-blur));
+  transition: filter .3s, opacity .4s;
+}
+/* The top and bottom fall away into the drum. */
+.reel-window::before, .reel-window::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 22%;
+  z-index: 3;
+  pointer-events: none;
+}
+.reel-window::before { top: 0; background: linear-gradient(#136a3b, rgba(19, 106, 59, 0)); }
+.reel-window::after  { bottom: 0; background: linear-gradient(rgba(19, 106, 59, 0), #136a3b); }
+
+/* Candy-cane tickets: striped body, name on a white label, perforation
+   lines where the stubs tear off. */
+.ticket {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(400px, 76%);
+  height: 48px;
+  margin-left: calc(-1 * min(400px, 76%) / 2);
+  border-radius: 8px;
+  background: repeating-linear-gradient(-45deg, #ff0160 0 9px, #fff 9px 18px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .18), 0 6px 14px rgba(0, 0, 0, .25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 46px;
+  box-sizing: border-box;
+  will-change: transform, opacity;
+  font-family: "Google Sans", "Roboto", Arial, sans-serif;
+  font-weight: 700;
+  color: #1a844b;
+  user-select: none;
+  visibility: hidden;
+}
+.ticket::before, .ticket::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  border-left: 2px dashed rgba(26, 132, 75, .55);
+}
+.ticket::before { left: 34px; }
+.ticket::after  { right: 34px; }
+.ticket span {
+  background: #fff;
+  border-radius: 6px;
+  padding: 4px 14px;
+  font-size: clamp(15px, 2.2vw, 20px);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: inset 0 0 0 2px rgba(255, 1, 96, .25);
+}
+.ticket.winner span { background: #f9c329; color: #4a3200; box-shadow: inset 0 0 0 2px #e7ad04; }
+
+/* The centre window: two gold rails the width of the drum and a pointer
+   each side, in the site's gold. */
+.reel-marker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 66px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 5;
+  border-top: 3px solid #f9c329;
+  border-bottom: 3px solid #f9c329;
+  box-shadow: 0 0 24px rgba(249, 195, 41, .25), inset 0 0 24px rgba(249, 195, 41, .18);
+}
+.reel-marker .arrow {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-top: 14px solid transparent;
+  border-bottom: 14px solid transparent;
+  transform: translateY(-50%);
+  filter: drop-shadow(0 2px 0 #e7ad04);
+}
+.reel-marker .arrow.left  { left: 22px;  border-left: 20px solid #f9c329; }
+.reel-marker .arrow.right { right: 22px; border-right: 20px solid #f9c329; }
+
+/* While the reel runs, the Spin button has gone; once it is done, the window
+   blurs back and the winner's box comes forward. */
+.reel.done .reel-window { filter: blur(6px); opacity: .35; }
+.reel.done .reel-marker { opacity: 0; transition: opacity .3s; }
+
+.reel-winner {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  opacity: 0;
+  transform: translateY(24px) scale(.94);
+  transition: opacity .4s .15s, transform .5s .15s cubic-bezier(0, 1.52, 0.295, 0.86);
+  pointer-events: none;
+}
+.reel.done .reel-winner { opacity: 1; transform: none; }
+.reel-winner-label { color: #fff; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; font-weight: 800; text-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
+.reel-winner-box {
+  background: #1a844b;
+  color: #fff;
+  border: 4px dashed #f9c329;
+  outline: 4px solid #f9c329;
+  outline-offset: 4px;
+  border-radius: 14px;
+  padding: 10px 32px;
+  font-family: Lobster, cursive;
+  font-size: clamp(30px, 5vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -1px;
+  text-shadow: 1px 2px 0 rgba(0, 0, 0, .13);
+  box-shadow: 0 0 36px rgba(249, 195, 41, .45);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Out of service: the reel dims and a hazard-striped banner runs diagonally
+   across it, in the site's gold. */
+.reel.locked .reel-window { filter: grayscale(.85) brightness(.75); }
+.reel.locked .reel-marker { opacity: .3; }
+.drum-lock { display: none; position: absolute; inset: 0; z-index: 7; align-items: center; justify-content: center; pointer-events: none; overflow: hidden; }
+.reel.locked .drum-lock { display: flex; }
+.drum-lock-banner {
+  width: 160%;
+  transform: rotate(-12deg);
+  background: #f9c329;
+  color: #4a3200;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 14px;
+  text-align: center;
+  padding: 11px 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-image: repeating-linear-gradient(-45deg, #4a3200 0 12px, #f9c329 12px 24px) 7;
+  box-shadow: 0 4px 0 #e7ad04, 0 10px 20px rgba(0, 0, 0, .3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The Build & Bolt elf, working on the drum's corner. */
+.reel-elf {
+  position: absolute;
+  right: -34px;
+  bottom: -18px;
+  width: 170px;
+  aspect-ratio: 1024 / 800;
+  z-index: 8;
+  pointer-events: none;
+  display: none;
+  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, .25));
+}
+.reel-elf svg { display: block; }
+.reel-wrap:has(.reel.locked) .reel-elf { display: block; }
+
+.reel-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+/* --- the result --------------------------------------------------------- */
+
+.result-label { color: #fff; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; font-weight: 800; text-shadow: 0 1px 0 rgba(0, 0, 0, .3); margin-bottom: 4px; }
+.dialog > #result-name { font-size: clamp(44px, 8vw, 72px); line-height: 1; transform: rotateZ(-3deg) skew(-4deg); margin-bottom: 18px; }
+.sheet.result { max-height: min(56vh, 480px); overflow-y: auto; }
+.result h4 { margin-top: 2px; }
+
+/* Each thing Santa knows is its own little card, in the village palette. */
+.wishlist { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; }
+.wishlist .wish {
+  background: #fff;
+  color: #202124;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+  border-left: 6px solid #6bb4fd;
+}
+.wishlist .wish:nth-child(4n+2) { border-left-color: #ff0160; }
+.wishlist .wish:nth-child(4n+3) { border-left-color: #f9c329; }
+.wishlist .wish:nth-child(4n+4) { border-left-color: #5203c0; }
+.wishlist .wish:first-child { grid-column: 1 / -1; border-left-color: #1a844b; background: #fff8e1; }
+.wishlist dt { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; font-weight: 800; color: #1a844b; }
+.wishlist dd { margin: 3px 0 0; font-size: 15px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+.wishlist > dd { grid-column: 1 / -1; color: #fff; margin: 0; }
+.wishlist dd em { font-style: normal; opacity: .85; }
+
+/* --- responsive --------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .chat-dialog { flex-flow: column; align-items: stretch; gap: 0; }
+  .chat-santa { justify-content: flex-start; margin-bottom: -16px; margin-left: 6px; position: relative; z-index: 1; }
+  .chat-santa .santa-window { font-size: .19px; margin-bottom: 0; }
+  .chat-title h1 { font-size: 30px; line-height: 30px; }
+  .chat-log { max-height: 36vh; }
+}
+
+@media (max-width: 640px) {
+  .dialog h1 { font-size: 30px; line-height: 30px; letter-spacing: -1px; }
+  .ornament { width: 320px; height: 190px; }
+  #screen-home { padding-top: 76px; }
+  .titleblock > p { margin-top: 10px; }
+  .playbutton { width: 118px; height: 118px; font-size: 21px; }
+  .home-actions { margin-top: 20px; gap: 16px 30px; }
+  .sheet-scroll { max-height: 52vh; }
+  .backdrop { padding: 10px; }
+  .topbar { height: 40px; }
+  .reel-wrap { margin-top: 14px; }
+  .reel { height: clamp(150px, 24vh, 200px); }
+  .ticket { height: 40px; padding: 0 30px; width: 84%; margin-left: -42%; }
+  .ticket::before { left: 22px; } .ticket::after { right: 22px; }
+  .ticket span { font-size: 14px; padding: 3px 10px; }
+  .reel-marker { height: 56px; }
+  .reel-marker .arrow { border-top-width: 10px; border-bottom-width: 10px; }
+  .reel-marker .arrow.left { left: 8px; border-left-width: 14px; } .reel-marker .arrow.right { right: 8px; border-right-width: 14px; }
+  .reel-winner-box { padding: 8px 18px; }
+  .reel-elf { width: 112px; right: -14px; bottom: -10px; }
+  .drum-lock-banner { font-size: 11px; letter-spacing: 1px; padding: 8px 0; }
+  .wishlist { grid-template-columns: 1fr; }
+  .drum-lock-ribbon { font-size: 11px; padding: 8px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .village [class*="elf"], .village .peekaboo-elf, .village .waterspout-top,
+  .village .waterspout-bottom, .village .snowman-build-top, .Body { animation: none !important; }
+  .screen.current > * { animation: none; }
+  .bubble { animation: none; }
+  .interlude .layer { transition-duration: .2s; transition-delay: 0s !important; }
+}

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Arcus Secret Santa</title>
+<meta name="description" content="Put your name in the hat, tell Santa what you are into, and find out who you are buying for on the 1st of December.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="img/village/tree.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/village.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="booting">
+
+<!-- The village. Layer order, the elves inside each layer and their class
+     names are the same as Santa Tracker's `modvil-village` scene, so the
+     stylesheet's positions and keyframes land where the artwork expects. -->
+<div id="stage" aria-hidden="true">
+  <santa-weather id="weather"></santa-weather>
+  <div class="village-scene">
+    <div class="village">
+      <div class="layer1"></div>
+      <div class="layer2">
+        <div class="elfski1"></div>
+        <div class="elfski2"></div>
+      </div>
+      <div class="layer3">
+        <div class="elf-glitch">
+          <div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class="elfbike4"></div>
+        <div class="elfbike6"></div>
+        <div class="elfbike2"></div>
+        <div class="elfbike3"></div>
+        <div class="elfbike5"></div>
+        <div class="elfbike1"></div>
+        <div class="elfchair"></div>
+        <div class="elfboard1"></div>
+        <div class="elfboard2"></div>
+      </div>
+      <div class="layer4">
+        <div class="peekaboo">
+          <div class="peekaboo-elf"></div>
+          <div class="peekaboo-tree"></div>
+        </div>
+        <div class="waterspout">
+          <div class="waterspout-bottom"></div>
+          <div class="waterspout-top"></div>
+        </div>
+        <div class="snowman-build">
+          <div class="snowman-build-bottom"></div>
+          <div class="snowman-build-top"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="topbar" aria-hidden="true"></div>
+
+<div id="screens">
+
+  <!-- ------------------------------------------------------------ home -->
+  <section class="screen" id="screen-home" aria-label="Home">
+    <div class="titleblock">
+      <div class="ornament" aria-hidden="true"></div>
+      <h1>Arcus Secret Santa</h1>
+      <p>Put your name in the hat, tell Santa what you&rsquo;re into,
+         and find out who you&rsquo;re buying for on the day.</p>
+
+      <div class="home-actions">
+        <button class="playbutton" id="home-join" data-go="chat" type="button"><span>Join the<br>pool</span></button>
+        <button class="playbutton green" id="home-signin" data-go="signin" type="button"><span>I&rsquo;ve been<br>here before</span></button>
+        <button class="playbutton green" id="home-profile" data-go="profile" type="button" hidden><span>My<br>answers</span></button>
+      </div>
+
+      <div class="statusline" id="home-status" hidden><span id="home-greeting"></span></div>
+
+      <!-- The drum, seen from the front: a reel of tickets flies up past the
+           marked centre window and stops on the drawn name. Until the reveal
+           date it is out of service, with an elf working on it. -->
+      <div class="reel-wrap" id="drum-wrap">
+        <div class="notice"><p></p></div>
+        <div class="reel" id="drum">
+          <div class="reel-window" id="drum-tickets" aria-live="off"></div>
+          <div class="reel-marker" aria-hidden="true">
+            <i class="arrow left"></i>
+            <i class="arrow right"></i>
+          </div>
+          <div class="reel-winner" id="drum-winner" aria-live="polite">
+            <div class="reel-winner-label">You are buying for</div>
+            <div class="reel-winner-box" id="match-name"></div>
+          </div>
+          <div class="drum-lock" id="drum-lock">
+            <div class="drum-lock-banner"><span id="drum-lock-text">Under construction &middot; opens 1 December</span></div>
+          </div>
+        </div>
+        <!-- The Build & Bolt elf from the toymaking floor, spanner in hand. -->
+        <div class="reel-elf" id="reel-elf" aria-hidden="true"></div>
+        <div class="reel-actions" id="drum-actions" hidden>
+          <button class="uibutton gold" id="drum-spin" type="button">Start the draw</button>
+          <button class="uibutton" id="drum-details" data-go="result" type="button" hidden>What Santa knows</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------- ask santa -->
+  <section class="screen" id="screen-chat" aria-label="Ask Santa">
+    <div class="backdrop">
+      <div class="dialog chat-dialog">
+
+        <!-- Santa sits beside the conversation and talks as he answers. -->
+        <div class="chat-santa">
+          <div class="santa-window" id="chat-santa" aria-hidden="true"></div>
+        </div>
+
+        <div class="chat-main">
+          <div class="chat-title">
+            <h1>Ask Santa</h1>
+            <button class="linkbutton" data-go="home" type="button">Close</button>
+          </div>
+          <div class="sheet">
+            <div class="notice"><p></p></div>
+            <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Conversation with Santa"></div>
+            <div class="chat-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="chat-progress"></i></div>
+            <div class="chips" id="chat-chips"></div>
+            <div class="chat-input">
+              <label class="visually-hidden" for="chat-input">Your answer</label>
+              <textarea id="chat-input" rows="1" data-autofocus placeholder="Type your answer" autocomplete="off"></textarea>
+              <button class="uibutton red" id="chat-send" type="button">Send</button>
+              <button class="linkbutton" id="chat-skip" type="button" hidden>Skip</button>
+            </div>
+            <div class="dialog-actions">
+              <button class="uibutton gold" id="chat-restart" type="button" hidden>Start again</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- joined -->
+  <section class="screen" id="screen-joined" aria-label="You are in">
+    <div class="backdrop">
+      <div class="dialog">
+        <h1>You&rsquo;re in!</h1>
+        <div class="sheet">
+          <h4>Keep this safe</h4>
+          <p><strong id="joined-name"></strong> is in the hat.</p>
+          <p class="quiet">This is your elf code. You&rsquo;ll need it to get back to your answers
+             on another device, or if you clear your browser. Tap it to copy.</p>
+          <div class="codebox">
+            <label class="visually-hidden" for="joined-code">Your elf code</label>
+            <input type="text" id="joined-code" readonly data-autofocus>
+          </div>
+          <p class="quiet" id="joined-when"></p>
+        </div>
+        <div class="dialog-actions">
+          <button class="uibutton green" data-go="profile" type="button">My answers</button>
+          <button class="linkbutton" data-go="home" type="button">Done</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- signin -->
+  <section class="screen" id="screen-signin" aria-label="Sign back in">
+    <div class="backdrop">
+      <div class="dialog">
+        <h1>Welcome back</h1>
+        <form class="sheet" id="join-form">
+          <div class="notice"><p></p></div>
+          <h4>Your elf code</h4>
+          <p class="quiet">The six characters Santa gave you when you joined.</p>
+          <div class="field code">
+            <label for="signin-code">Elf code</label>
+            <input type="text" id="signin-code" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" data-autofocus>
+          </div>
+          <div class="field">
+            <label for="signin-name">Your name</label>
+            <input type="text" id="signin-name" autocomplete="name" placeholder="Optional, but it helps">
+          </div>
+          <div class="dialog-actions">
+            <button class="uibutton green" type="submit">Sign in</button>
+            <button class="linkbutton" data-go="home" type="button">Back</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- result -->
+  <section class="screen" id="screen-result" aria-label="Who you are buying for">
+    <div class="backdrop">
+      <div class="dialog">
+        <div class="result-label">You are buying for</div>
+        <h1 id="result-name"></h1>
+        <div class="sheet result">
+          <h4>What Santa knows about them</h4>
+          <dl class="wishlist" id="match-wishlist"></dl>
+        </div>
+        <div class="dialog-actions">
+          <button class="uibutton" data-go="home" type="button">Back</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------- profile -->
+  <section class="screen" id="screen-profile" aria-label="My answers">
+    <div class="backdrop">
+      <div class="dialog">
+        <h1>My answers</h1>
+        <form class="sheet" id="profile-form">
+          <div class="notice"><p></p></div>
+          <p class="quiet">Change these any time &mdash; whoever draws you sees the latest version.</p>
+          <div class="sheet-scroll">
+            <div class="field">
+              <label for="profile-name">Name</label>
+              <input type="text" id="profile-name" autocomplete="name" data-autofocus>
+            </div>
+            <div id="profile-answers"></div>
+            <div class="field">
+              <label for="profile-hint">Your hint</label>
+              <textarea id="profile-hint" placeholder="Anything specific you'd love (optional)"></textarea>
+              <div class="sub">This is the first thing your Secret Santa sees.</div>
+            </div>
+            <div class="field">
+              <label for="profile-code">Your elf code</label>
+              <div class="codebox">
+                <input type="text" id="profile-code" readonly>
+              </div>
+              <div class="sub">Tap to copy. Use it to sign in on another device.</div>
+            </div>
+          </div>
+          <div class="dialog-actions">
+            <button class="uibutton green" type="submit">Save</button>
+            <span id="profile-saved" class="linkbutton" hidden>Saved!</span>
+            <button class="linkbutton" data-go="home" type="button">Back</button>
+          </div>
+          <p class="quiet" id="profile-locked" hidden>The names have been drawn, so you can&rsquo;t take
+             yourself out now &mdash; but you can still tidy up your answers.</p>
+          <div class="dialog-actions">
+            <button class="linkbutton" id="leave" type="button">Leave the pool</button>
+            <button class="linkbutton" id="forget" type="button">Forget me on this device</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Santa Tracker's interlude: four coloured layers sweep up over the page
+     between screens, then carry on up and off. -->
+<div class="interlude" id="interlude" aria-hidden="true">
+  <div class="layer layer-0"></div>
+  <div class="layer layer-1"></div>
+  <div class="layer layer-2"></div>
+  <div class="layer layer-3"></div>
+</div>
+
+<script src="vendor/lottie_light.min.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/beard.js"></script>
+<script src="js/santa.js"></script>
+<script src="js/drum.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

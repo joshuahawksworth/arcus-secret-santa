@@ -1,0 +1,15 @@
+{
+  "name": "arcus-secret-santa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Internal Secret Santa for the Arcus team, set in a snowy village.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
