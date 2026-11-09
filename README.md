@@ -66,6 +66,12 @@ that is a fair trade.
 Vercel runs on UTC, so `REVEAL_DATE` (and the 1 December default) opens the
 drum at midnight UTC.
 
+### Cache busting
+
+The stylesheet and script links in `public/index.html` carry a `?v=N` query.
+Browsers cache those files for an hour, so **bump the number when you change
+CSS or JS** and everyone picks the new version up on their next load.
+
 ## How it works
 
 ### Joining

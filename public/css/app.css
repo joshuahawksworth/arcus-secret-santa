@@ -726,10 +726,11 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
 }
 /* The conversation gets first claim on the width; Santa fits beside it. */
 .chat-main { flex: 1 1 680px; min-width: 0; max-width: 760px; display: flex; flex-flow: column; max-height: 100%; }
+.chat-main .sheet { min-height: 396px; }   /* 900em at .44px: Santa's frame height */
 .chat-santa { flex: 0 1 auto; display: flex; align-items: flex-end; min-width: 0; }
 .chat-santa .santa-window {
   font-size: .44px;
-  margin-bottom: -8px;
+  margin-bottom: 0;       /* his frame ends exactly where the panel does */
   margin-right: -70px;    /* his shoulder tucks behind the panel's edge */
   max-width: 34vw;
 }
@@ -746,8 +747,8 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   display: flex;
   flex-flow: column;
   gap: 8px;
-  min-height: 260px;
-  max-height: min(56vh, 520px);
+  min-height: 340px;
+  max-height: min(60vh, 560px);
   padding: 4px 2px;
 }
 
