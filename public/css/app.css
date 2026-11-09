@@ -747,8 +747,10 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   display: flex;
   flex-flow: column;
   gap: 8px;
-  min-height: 340px;
-  max-height: min(60vh, 560px);
+  /* A fixed height, so the panel never grows as the conversation does: new
+     lines scroll in instead. */
+  flex: none;
+  height: clamp(300px, 50vh, 460px);
   padding: 4px 2px;
 }
 
@@ -1115,7 +1117,7 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   .chat-santa { justify-content: flex-start; margin-bottom: -16px; margin-left: 6px; position: relative; z-index: 1; }
   .chat-santa .santa-window { font-size: .2px; margin-bottom: 0; margin-right: 0; max-width: none; }
   .chat-title h1 { font-size: 30px; line-height: 30px; }
-  .chat-log { max-height: 36vh; }
+  .chat-log { height: 36vh; }
 }
 
 @media (max-width: 640px) {
