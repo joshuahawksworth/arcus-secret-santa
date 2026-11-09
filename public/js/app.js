@@ -311,9 +311,6 @@
       $('#home-signin').hidden = known;
       $('#home-profile').hidden = !known;
 
-      $('#home-greeting').textContent = known ? `Welcome back, ${this.me.name}.` : '';
-      $('#home-status').hidden = !known;
-
       this.renderDrum();
     },
 

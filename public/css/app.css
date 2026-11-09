@@ -185,23 +185,6 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 }
 .home-secondary { display: flex; flex-flow: column; gap: 10px; align-items: center; }
 
-/* One readable strip for the pool status, so it holds up over the village. */
-.statusline {
-  margin-top: 24px;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  gap: 2px;
-  background: rgba(0, 0, 0, .55);
-  border-radius: 14px;
-  padding: 9px 18px;
-  font-size: 14px;
-  font-weight: 500;
-  max-width: 100%;
-}
-.statusline span:empty { display: none; }
-.statusline #home-when, .statusline #home-closed { font-size: 13px; }
-
 /* --- buttons (Santa Tracker's #play and .uibutton) ----------------------- */
 
 .playbutton {
