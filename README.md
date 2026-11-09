@@ -6,6 +6,36 @@ Santa who asks you what you're into before putting your name in the hat.
 On the 1st of December the hat closes, the names are drawn, and everyone comes
 back to find out who they're buying for.
 
+**Live at [www.arcus-secret-santa.com](https://www.arcus-secret-santa.com)**
+
+## What it looks like
+
+The village, with the raffle drum out of service until 1 December and the
+Build & Bolt elf working on it:
+
+![The home screen: a snowy village, two round buttons, and a hazard-taped raffle drum](docs/home.png)
+
+Joining is a conversation. The screen slides in under the site's four-colour
+interlude, and Santa breathes, blinks and talks while he asks:
+
+![The interlude transition into the chat](docs/interlude.gif)
+![Santa talking in the chat](docs/santa-talk.gif)
+
+![The chat with Santa beside it](docs/chat.png)
+
+On the day, the drum opens. Start the draw and the tickets fly past the
+marker and run down to a stop on your name:
+
+![The drum spinning and landing on a name](docs/drum.gif)
+
+![The drum, open and ready](docs/drum-open.png)
+![Who you got](docs/drum-result.png)
+![What Santa knows about them](docs/result.png)
+
+It works on a phone too:
+
+<img src="docs/mobile.png" alt="The home screen on a phone" width="300">
+
 ## Running it
 
 Two ways: your own box with a JSON file, or Vercel with Blob storage. The
@@ -41,6 +71,14 @@ All optional, all environment variables:
 ```bash
 PORT=8080 REVEAL_DATE=2026-12-01 ADMIN_TOKEN=some-long-secret npm start
 ```
+
+### Sharing the link
+
+`public/index.html` carries Open Graph and Twitter card tags, so pasting the
+link into Teams, Discord or Slack shows a title, a line of description and a
+picture of the village (`public/img/og.png`, 1200×630). Messaging apps cache
+these cards; if you change the image, re-paste a slightly different URL (add
+`?x=1`) to see the new one.
 
 ### On Vercel
 
@@ -162,15 +200,15 @@ the site could reset the pool otherwise. The preview deployment has it on.
 Only if `ADMIN_TOKEN` is set. Useful if you want to draw early or start over.
 
 ```bash
-curl -s localhost:3000/api/admin/overview -H "x-admin-token: $ADMIN_TOKEN"
+curl -s https://www.arcus-secret-santa.com/api/admin/overview -H "x-admin-token: $ADMIN_TOKEN"
 ```
 
 ```bash
-curl -s -X POST localhost:3000/api/admin/draw -H "x-admin-token: $ADMIN_TOKEN"
+curl -s -X POST https://www.arcus-secret-santa.com/api/admin/draw -H "x-admin-token: $ADMIN_TOKEN"
 ```
 
 ```bash
-curl -s -X POST localhost:3000/api/admin/reset -H "x-admin-token: $ADMIN_TOKEN" -H 'content-type: application/json' -d '{"emptyPool":false}'
+curl -s -X POST https://www.arcus-secret-santa.com/api/admin/reset -H "x-admin-token: $ADMIN_TOKEN" -H 'content-type: application/json' -d '{"emptyPool":false}'
 ```
 
 `reset` clears the draw and lets people join again. Pass `{"emptyPool": true}`
