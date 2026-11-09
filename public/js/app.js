@@ -404,9 +404,11 @@
       this.drum.setNames(names);
 
       if (!revealed) {
-        this.drum.setLocked(true, names.length
-          ? `Under construction \u00b7 opens ${when}`
-          : `Nobody in the hat yet \u00b7 opens ${when}`);
+        let text;
+        if (this.state.revealTime) text = 'Needs at least two names in the hat';
+        else if (names.length) text = `Under construction \u00b7 opens ${when}`;
+        else text = `Nobody in the hat yet \u00b7 opens ${when}`;
+        this.drum.setLocked(true, text);
         return;
       }
 

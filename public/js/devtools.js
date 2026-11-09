@@ -145,12 +145,13 @@
           await call('/api/dev/reveal', { mode: 'locked' });
           this.log('drum locked (reveal next year)');
           break;
-        case 'open':
-          await call('/api/dev/reveal', { mode: 'open' });
-          this.log('drum open (reveal yesterday)');
+        case 'open': {
+          const r = await call('/api/dev/reveal', { mode: 'open' });
+          this.log(r.drawn ? 'drum open and names drawn' : `drum open but not drawn: ${r.reason}`);
           break;
+        }
         case 'draw':
-          await call('/api/dev/draw');
+          await call('/api/dev/draw', {});
           this.log('names redrawn');
           break;
         case 'default':
