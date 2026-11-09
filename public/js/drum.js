@@ -23,6 +23,7 @@
      * @param {object} els
      *   drum     the frame
      *   tickets  the window the tickets scroll through
+     *   focus    a copy of that window clipped to the centre band, kept sharp
      *   lock     the locked overlay
      *   lockText the text inside it
      */
@@ -53,21 +54,27 @@
     setNames(names) {
       this.names = names.slice();
       this.els.tickets.replaceChildren();
+      if (this.els.focus) this.els.focus.replaceChildren();
       this.strip = [];
       if (!names.length) return;
 
-      // Repeat the list until the strip is comfortably longer than the window.
-      const repeats = Math.max(1, Math.ceil(MIN_STRIP / names.length));
+      // Repeat the list until the strip is comfortably longer than the window,
+      // and an even length so the red/white alternation meets itself cleanly.
+      let repeats = Math.max(1, Math.ceil(MIN_STRIP / names.length));
+      if ((repeats * names.length) % 2 === 1) repeats += 1;
       for (let r = 0; r < repeats; r++) {
         for (const name of names) {
           const el = document.createElement('div');
-          el.className = 'ticket';
+          el.className = 'ticket' + (this.strip.length % 2 ? ' alt' : '');
           const label = document.createElement('span');
           label.textContent = name;
           el.appendChild(label);
           el.title = name;
           this.els.tickets.appendChild(el);
-          this.strip.push({ name, el });
+          // The focus layer shows the same ticket, sharp, through the centre window.
+          const focus = el.cloneNode(true);
+          if (this.els.focus) this.els.focus.appendChild(focus);
+          this.strip.push({ name, el, focus });
         }
       }
       this.y = 0;
@@ -85,7 +92,8 @@
       this.height = h;
       const sample = this.strip[0];
       if (sample) {
-        const gap = parseFloat(window.getComputedStyle(this.els.tickets).getPropertyValue('--ticket-gap')) || 10;
+        const gapValue = parseFloat(window.getComputedStyle(this.els.tickets).getPropertyValue('--ticket-gap'));
+        const gap = Number.isNaN(gapValue) ? 0 : gapValue;
         this.ticketH = sample.el.offsetHeight;
         this.pitch = this.ticketH + gap;
       }
@@ -112,7 +120,7 @@
 
       this._spinning = true;
       this.els.drum.classList.add('spinning');
-      for (const t of this.strip) t.el.classList.remove('winner');
+      for (const t of this.strip) { t.el.classList.remove('winner'); t.focus.classList.remove('winner'); }
 
       // Land on whichever copy of the name is next after LOOPS full passes.
       const L = this.length;
@@ -137,6 +145,7 @@
           this._spinning = false;
           this.els.drum.classList.remove('spinning');
           winner.el.classList.add('winner');
+          winner.focus.classList.add('winner');
           window.setTimeout(() => resolve(winner.el), 700);
         };
         this._rAF = window.requestAnimationFrame(frame);
@@ -151,25 +160,33 @@
       if (!L) return;
       const H = this.height;
       const pitch = this.pitch;
-      // Faster passes blur more; it eases off as the reel slows.
+      // Faster passes smear more, and only away from the centre window.
       const speed = this._spinning ? (1 - progress) : 0;
-      this.els.drum.style.setProperty('--reel-blur', `${(speed * 3).toFixed(2)}px`);
 
+      const blur = speed * 2.5;
+      const filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : '';
       for (let i = 0; i < this.strip.length; i++) {
-        const el = this.strip[i].el;
+        const { el, focus } = this.strip[i];
         let pos = ((i * pitch - this.y) % L + L) % L;   // 0 .. L
         if (pos > L - pitch) pos -= L;                   // let the top one peek in from above
         if (pos < -pitch || pos > H) {
-          if (el.style.visibility !== 'hidden') el.style.visibility = 'hidden';
+          if (el.style.visibility !== 'hidden') {
+            el.style.visibility = 'hidden';
+            focus.style.visibility = 'hidden';
+          }
           continue;
         }
-        el.style.visibility = 'visible';
-        // Towards the edges the drum curves away: a touch smaller and dimmer.
+        const transform = `translate3d(0, ${pos.toFixed(1)}px, 0)`;
+        // Towards the edges the drum curves away: dimmer, and smeared while moving.
         const centre = (pos + this.ticketH / 2) - H / 2;
         const edge = Math.min(1, Math.abs(centre) / (H / 2));
-        const scale = 1 - edge * 0.12;
-        el.style.opacity = String(1 - edge * 0.45);
-        el.style.transform = `translate3d(0, ${pos.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
+        el.style.visibility = 'visible';
+        el.style.filter = filter;
+        el.style.opacity = String(1 - edge * 0.35);
+        el.style.transform = transform;
+        // The copy behind the centre window is never blurred or dimmed.
+        focus.style.visibility = 'visible';
+        focus.style.transform = transform;
       }
     }
   }

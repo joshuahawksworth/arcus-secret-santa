@@ -816,8 +816,7 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
 /* The frame: the site's shell green, deep inside, candy-cane rails top and
    bottom. Tickets scroll through the window behind the centre marker. */
 .reel {
-  --ticket-gap: 10px;
-  --reel-blur: 0px;
+  --ticket-gap: 0px;
   position: relative;
   width: 100%;
   height: clamp(170px, 26vh, 250px);
@@ -841,10 +840,23 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
 .reel-window {
   position: absolute;
   inset: 12px 0;
-  --ticket-gap: 10px;
-  filter: blur(var(--reel-blur));
+  --ticket-gap: 0px;
   transition: filter .3s, opacity .4s;
 }
+/* The same strip again, clipped to the centre window and never blurred, so
+   whichever name is passing the marker can always be read. */
+.reel-focus {
+  position: absolute;
+  inset: 12px 0;
+  --ticket-gap: 0px;
+  clip-path: inset(calc(50% - 33px) 0 calc(50% - 33px) 0);
+  z-index: 4;
+  pointer-events: none;
+  transition: opacity .3s;
+}
+.reel.done .reel-focus { opacity: 0; }
+.reel.locked .reel-focus { filter: brightness(.9); }
+
 /* The top and bottom fall away into the drum. */
 .reel-window::before, .reel-window::after {
   content: "";
@@ -858,8 +870,8 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
 .reel-window::before { top: 0; background: linear-gradient(#136a3b, rgba(19, 106, 59, 0)); }
 .reel-window::after  { bottom: 0; background: linear-gradient(rgba(19, 106, 59, 0), #136a3b); }
 
-/* Candy-cane tickets: striped body, name on a white label, perforation
-   lines where the stubs tear off. */
+/* Candy-cane tickets: red, white, red, white, stacked edge to edge, with
+   perforation lines where the stubs tear off. */
 .ticket {
   position: absolute;
   left: 50%;
@@ -867,44 +879,40 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
   width: min(400px, 76%);
   height: 48px;
   margin-left: calc(-1 * min(400px, 76%) / 2);
-  border-radius: 8px;
-  background: repeating-linear-gradient(-45deg, #ff0160 0 9px, #fff 9px 18px);
-  box-shadow: 0 3px 0 rgba(0, 0, 0, .18), 0 6px 14px rgba(0, 0, 0, .25);
+  background: #ff0160;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 46px;
   box-sizing: border-box;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
   font-family: "Google Sans", "Roboto", Arial, sans-serif;
   font-weight: 700;
-  color: #1a844b;
-  user-select: none;
-  visibility: hidden;
-}
-.ticket::before, .ticket::after {
-  content: "";
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  border-left: 2px dashed rgba(26, 132, 75, .55);
-}
-.ticket::before { left: 34px; }
-.ticket::after  { right: 34px; }
-.ticket span {
-  background: #fff;
-  border-radius: 6px;
-  padding: 4px 14px;
   font-size: clamp(15px, 2.2vw, 20px);
   letter-spacing: .5px;
   text-transform: uppercase;
+  user-select: none;
+  visibility: hidden;
+}
+.ticket.alt { background: #fff; color: #ff0160; }
+.ticket::before, .ticket::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  border-left: 2px dashed currentColor;
+  opacity: .45;
+}
+.ticket::before { left: 30px; }
+.ticket::after  { right: 30px; }
+.ticket span {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  box-shadow: inset 0 0 0 2px rgba(255, 1, 96, .25);
 }
-.ticket.winner span { background: #f9c329; color: #4a3200; box-shadow: inset 0 0 0 2px #e7ad04; }
+.ticket.winner { background: #f9c329; color: #4a3200; }
 
 /* The centre window: two gold rails the width of the drum and a pointer
    each side, in the site's gold. */
@@ -978,7 +986,7 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
 
 /* Out of service: the reel dims and a hazard-striped banner runs diagonally
    across it, in the site's gold. */
-.reel.locked .reel-window { filter: grayscale(.85) brightness(.75); }
+.reel.locked .reel-window { filter: brightness(.9); }
 .reel.locked .reel-marker { opacity: .3; }
 .drum-lock { display: none; position: absolute; inset: 0; z-index: 7; align-items: center; justify-content: center; pointer-events: none; overflow: hidden; }
 .reel.locked .drum-lock { display: flex; }
@@ -1074,10 +1082,10 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
   .topbar { height: 40px; }
   .reel-wrap { margin-top: 14px; }
   .reel { height: clamp(150px, 24vh, 200px); }
-  .ticket { height: 40px; padding: 0 30px; width: 84%; margin-left: -42%; }
-  .ticket::before { left: 22px; } .ticket::after { right: 22px; }
-  .ticket span { font-size: 14px; padding: 3px 10px; }
+  .ticket { height: 40px; padding: 0 30px; width: 84%; margin-left: -42%; font-size: 14px; }
+  .ticket::before { left: 20px; } .ticket::after { right: 20px; }
   .reel-marker { height: 56px; }
+  .reel-focus { clip-path: inset(calc(50% - 28px) 0 calc(50% - 28px) 0); }
   .reel-marker .arrow { border-top-width: 10px; border-bottom-width: 10px; }
   .reel-marker .arrow.left { left: 8px; border-left-width: 14px; } .reel-marker .arrow.right { right: 8px; border-right-width: 14px; }
   .reel-winner-box { padding: 8px 18px; }

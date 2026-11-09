@@ -258,6 +258,7 @@
       this.drum = new window.RaffleDrum({
         drum: $('#drum'),
         tickets: $('#drum-tickets'),
+        focus: $('#drum-focus'),
         lock: $('#drum-lock'),
         lockText: $('#drum-lock-text'),
       });
