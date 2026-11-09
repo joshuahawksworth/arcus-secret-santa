@@ -180,7 +180,8 @@
       const host = $('#reel-elf');
       if (!host || !window.lottie) return;
       // The card animation is a quick half-second tightening of a bolt. Here
-      // it plays slowly, rests, and goes again, like someone actually working.
+      // it plays slowly forwards, pauses, plays back to the start, pauses, and
+      // goes again: a to-and-fro with no jump back to frame one.
       const anim = window.lottie.loadAnimation({
         container: host,
         renderer: 'svg',
@@ -190,9 +191,17 @@
         rendererSettings: { preserveAspectRatio: 'xMidYMax meet' },
       });
       anim.setSpeed(0.45);
-      anim.addEventListener('DOMLoaded', () => anim.goToAndPlay(0, true));
+      let direction = 1;
+      const rest = () => 900 + Math.random() * 900;
+      anim.addEventListener('DOMLoaded', () => { anim.setDirection(1); anim.goToAndPlay(0, true); });
       anim.addEventListener('complete', () => {
-        window.setTimeout(() => { if (host.isConnected) anim.goToAndPlay(0, true); }, 1800 + Math.random() * 1500);
+        window.setTimeout(() => {
+          if (!host.isConnected) return;
+          direction = -direction;
+          anim.setDirection(direction);
+          // Resume from the frame it stopped on, so the motion simply turns round.
+          anim.goToAndPlay(direction === 1 ? 0 : anim.totalFrames - 1, true);
+        }, rest());
       });
     },
 
