@@ -1041,6 +1041,9 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
 }
 /* The underside: the same strip, shorter, darker, no text, with forked tails. */
 .drum-lock-banner.back {
+  /* Sits a few pixels higher than the front, so the tails look like they
+     fold up and round the back rather than lying flat behind it. */
+  transform: translateY(-6px) rotate(var(--ribbon-angle));
   width: 124%;
   height: calc(14px + 22px + 1.4em);     /* borders + padding + a line of text */
   padding: 0;
