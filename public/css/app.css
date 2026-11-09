@@ -402,6 +402,10 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   margin: 1em 0 0;
   transition: opacity .4s, transform .4s;
 }
+/* Inside a sheet the buttons stand 8px proud (their depth), so leave the same
+   room below them as above. */
+.sheet .dialog-actions { margin: 18px 0 10px; }
+.sheet .dialog-actions:last-child { margin-bottom: 14px; }
 .screen.leaving .dialog-actions { opacity: 0; transform: translateY(50%); }
 
 /* --- fields (the site's `nav .url input`) -------------------------------- */
@@ -636,7 +640,7 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
   100% { transform: translateY(0); }
 }
 
-/* --- the elf code ------------------------------------------------------- */
+/* --- the code ----------------------------------------------------------- */
 
 /* The site's copyable share field: click to copy, inverting while it does. */
 .codebox { position: relative; }
