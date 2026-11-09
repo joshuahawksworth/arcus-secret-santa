@@ -59,14 +59,20 @@ lasts as long as the warm instance does. Fine for a look round, not for the
 real thing.
 
 `lib/blobstore.js` talks to the Blob REST API directly, so the app stays
-dependency-free. The layout is one blob per person
-(`secret-santa/people/<id>.json`) plus one for the draw
-(`secret-santa/draw.json`), so two people joining or editing at the same moment
-write to different files and cannot overwrite each other. The draw document is
-written once, at the draw. Each request lists the prefix and fetches the blobs
-in parallel: a few hundred milliseconds for a team-sized pool. A pool from the
-earlier single-blob layout (`secret-santa/pool.json`) is split into this one the
-first time it is read.
+dependency-free. Two rules keep it correct:
+
+* **One document per person** (`secret-santa/people/<id>/…`) plus one for the
+  draw (`secret-santa/draw/…`), so two people joining or editing at the same
+  moment write different files and cannot overwrite each other.
+* **Blobs are never overwritten.** Every save writes a new version to a new
+  URL and then deletes the old one. Vercel's Blob CDN caches a URL for at
+  least a minute even when asked not to, so overwriting in place could serve
+  last minute's content; a brand-new URL cannot be stale. The (uncached) list
+  endpoint says which version is current.
+
+Each request lists the prefix and fetches the current documents in parallel: a
+few hundred milliseconds for a team-sized pool. Pools from the two earlier
+layouts are converted on first read.
 
 Vercel runs on UTC, so `REVEAL_DATE` (and the 1 December default) opens the
 drum at midnight UTC.

@@ -30,12 +30,10 @@ test('each person is their own blob, the draw another, and a new instance sees a
   const cat = await a.addParticipant({ name: 'Cat', hint: '', answers: [] });
   await a.setAssignments({ [ann.id]: bob.id, [bob.id]: cat.id, [cat.id]: ann.id });
 
-  assert.deepStrictEqual([...fake.blobs.keys()].sort(), [
-    `${prefix}/draw.json`,
-    `${prefix}/people/${ann.id}.json`,
-    `${prefix}/people/${bob.id}.json`,
-    `${prefix}/people/${cat.id}.json`,
-  ].sort());
+  const keys = [...fake.blobs.keys()].filter((k) => k.startsWith(prefix)).sort();
+  assert.strictEqual(keys.length, 4, 'one current version per document');
+  assert.ok(keys.some((k) => k.startsWith(`${prefix}/draw/`)));
+  for (const id of [ann.id, bob.id, cat.id]) assert.ok(keys.some((k) => k.startsWith(`${prefix}/people/${id}/`)));
 
   const b = await fresh(prefix);               // another serverless invocation
   assert.deepStrictEqual(b.state.participants.map((p) => p.name), ['Ann', 'Bob', 'Cat']);
@@ -71,13 +69,17 @@ test('save() writes only what changed, and removing someone deletes their blob',
   const ann = await s.addParticipant({ name: 'Ann', hint: '', answers: [] });
   const bob = await s.addParticipant({ name: 'Bob', hint: '', answers: [] });
 
-  const before = new Map([...fake.blobs]);
+  const pathsFor = (id) => [...fake.blobs.keys()].filter((k) => k.startsWith(`${prefix}/people/${id}/`));
+  const annBefore = pathsFor(ann.id);
+  const bobBefore = pathsFor(bob.id);
   await s.updateParticipant(bob.id, { hint: 'new' });
-  assert.strictEqual(fake.blobs.get(`${prefix}/people/${ann.id}.json`), before.get(`${prefix}/people/${ann.id}.json`), 'Ann untouched');
-  assert.notStrictEqual(fake.blobs.get(`${prefix}/people/${bob.id}.json`), before.get(`${prefix}/people/${bob.id}.json`), 'Bob rewritten');
+  assert.deepStrictEqual(pathsFor(ann.id), annBefore, 'Ann untouched');
+  const bobAfter = pathsFor(bob.id);
+  assert.strictEqual(bobAfter.length, 1, 'old version of Bob deleted');
+  assert.notStrictEqual(bobAfter[0], bobBefore[0], 'Bob written to a new URL, never overwritten');
 
   await s.removeParticipant(bob.id);
-  assert.ok(!fake.blobs.has(`${prefix}/people/${bob.id}.json`));
+  assert.strictEqual(pathsFor(bob.id).length, 0);
   const t = await fresh(prefix);
   assert.deepStrictEqual(t.state.participants.map((p) => p.name), ['Ann']);
 
@@ -101,9 +103,11 @@ test('a single-blob pool is split into the per-person layout on first read', asy
   const s = await fresh(prefix);
   assert.deepStrictEqual(s.state.participants.map((p) => p.name), ['Old One', 'Old Two']);
   assert.strictEqual(s.state.assignments.p1, 'p2');
-  assert.deepStrictEqual([...fake.blobs.keys()].filter((k) => k.startsWith(prefix)).sort(), [
-    `${prefix}/draw.json`, `${prefix}/people/p1.json`, `${prefix}/people/p2.json`,
-  ]);
+  const after = [...fake.blobs.keys()].filter((k) => k.startsWith(prefix)).sort();
+  assert.strictEqual(after.length, 3);
+  assert.ok(!after.includes(`${prefix}/pool.json`), 'legacy blob removed');
+  assert.ok(after.some((k) => k.startsWith(`${prefix}/draw/`)));
+  assert.ok(after.some((k) => k.startsWith(`${prefix}/people/p1/`)));
 
   const t = await fresh(prefix);               // and it stays that way
   assert.strictEqual(t.state.participants.length, 2);
@@ -116,4 +120,34 @@ test('list pagination is followed across pages', async () => {
   for (let i = 0; i < 7; i++) await s.addParticipant({ name: `P${i}`, hint: '', answers: [] });
   const t = await fresh(prefix);               // the fake serves 2 per page
   assert.strictEqual(t.state.participants.length, 7);
+});
+
+test('the flat per-person layout is converted to versioned documents on first read', async () => {
+  const prefix = 'pool-flat';
+  fake.blobs.set(`${prefix}/people/p1.json`, JSON.stringify({ id: 'p1', token: 't', code: 'CCCCCC', name: 'Flat One', hint: '', answers: [], joinedAt: '2025-01-01T00:00:00Z' }));
+  fake.blobs.set(`${prefix}/draw.json`, JSON.stringify({ assignments: null, drawnAt: null, seenBy: {}, settings: { revealDate: '2030-01-01' } }));
+
+  const s = await fresh(prefix);
+  assert.deepStrictEqual(s.state.participants.map((p) => p.name), ['Flat One']);
+  assert.strictEqual(s.state.settings.revealDate, '2030-01-01');
+  const keys = [...fake.blobs.keys()].filter((k) => k.startsWith(prefix)).sort();
+  assert.ok(!keys.includes(`${prefix}/people/p1.json`) && !keys.includes(`${prefix}/draw.json`), 'flat files replaced');
+  assert.ok(keys.some((k) => k.startsWith(`${prefix}/people/p1/`)) && keys.some((k) => k.startsWith(`${prefix}/draw/`)));
+});
+
+test('a stale CDN cannot hand back an old draw: every write is a brand-new URL', async () => {
+  const prefix = 'pool-versions';
+  const s = await fresh(prefix);
+  const a = await s.addParticipant({ name: 'A', hint: '', answers: [] });
+  const b = await s.addParticipant({ name: 'B', hint: '', answers: [] });
+  const drawPaths = () => [...fake.blobs.keys()].filter((k) => k.startsWith(`${prefix}/draw/`));
+  const v1 = drawPaths();
+  await s.setAssignments({ [a.id]: b.id, [b.id]: a.id });
+  const v2 = drawPaths();
+  assert.strictEqual(v2.length, 1);
+  assert.notStrictEqual(v2[0], v1[0]);
+  await s.clearAssignments();
+  const v3 = drawPaths();
+  assert.strictEqual(v3.length, 1);
+  assert.notStrictEqual(v3[0], v2[0]);
 });
