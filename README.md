@@ -36,6 +36,7 @@ All optional, all environment variables:
 | `REVEAL_DATE` | 1 December of the current year | `YYYY-MM-DD`, midnight server time |
 | `DATA_FILE` | `data/pool.json` | Where the pool is stored |
 | `ADMIN_TOKEN` | *(unset)* | Enables the admin endpoints below. Leave unset and they stay off. |
+| `DEV_TOOLS` | *(unset)* | `1` enables the `?dev` panel and its endpoints. Testing only. |
 
 ```bash
 PORT=8080 REVEAL_DATE=2026-12-01 ADMIN_TOKEN=some-long-secret npm start
@@ -124,6 +125,21 @@ no self-draws exists for *any* number of people from 2 upwards — an even count
 is only needed if you want everyone paired off *mutually* (A buys for B and B
 buys for A), which this isn't.
 
+### Dev tools
+
+Set `DEV_TOOLS=1` and open the site with `?dev` on the end of the address
+(`http://localhost:3000/?dev`). A panel appears bottom-left that can:
+
+* seed the pool with 8 (or 7) made-up people, complete with answers and hints
+* lock the drum (reveal date next year), or open it (reveal date yesterday)
+  which also runs the draw; redraw; or go back to the real reveal date
+* sign in as any seeded person, or forget the current one
+* jump to any screen
+
+Press `D` to hide or show the panel. The `/api/dev/*` endpoints behind it need
+no token, so **unset `DEV_TOOLS` before the real run**: anyone who can reach
+the site could reset the pool otherwise. The preview deployment has it on.
+
 ### Admin
 
 Only if `ADMIN_TOKEN` is set. Useful if you want to draw early or start over.
@@ -174,6 +190,7 @@ public/
   js/santa.js        Santa: blinking, breathing, talking
   js/drum.js         the raffle drum reel
   js/chat.js         the questions, and the conversation engine
+  js/devtools.js     the ?dev panel
   js/app.js          screens, transitions, and the API client
   vendor/            lottie_light, for the Build & Bolt elf
   img/ fonts/        artwork and fonts

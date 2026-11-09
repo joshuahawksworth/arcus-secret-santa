@@ -156,19 +156,43 @@
       this.renderHome();
       document.body.classList.remove('booting');
       this.setScreen('home');
+
+      // The dev panel: only with ?dev in the address and DEV_TOOLS=1 on the server.
+      if (window.DevTools && this.state.devTools && /[?&#]dev\b/.test(window.location.href)) {
+        this.devtools = new window.DevTools(this);
+      }
+    },
+
+    /** Takes on a signed-in person (used by the dev tools). */
+    adopt(person) {
+      this.me = person;
+      identity.save(person);
+    },
+
+    /** Drops the remembered person without touching the pool. */
+    forget() {
+      identity.clear();
+      this.me = null;
     },
 
     /** The Build & Bolt elf from the toymaking floor, tightening bolts on the drum. */
     workingElf() {
       const host = $('#reel-elf');
       if (!host || !window.lottie) return;
-      window.lottie.loadAnimation({
+      // The card animation is a quick half-second tightening of a bolt. Here
+      // it plays slowly, rests, and goes again, like someone actually working.
+      const anim = window.lottie.loadAnimation({
         container: host,
         renderer: 'svg',
-        loop: true,
-        autoplay: true,
+        loop: false,
+        autoplay: false,
         path: 'img/buildandbolt.json',
         rendererSettings: { preserveAspectRatio: 'xMidYMax meet' },
+      });
+      anim.setSpeed(0.45);
+      anim.addEventListener('DOMLoaded', () => anim.goToAndPlay(0, true));
+      anim.addEventListener('complete', () => {
+        window.setTimeout(() => { if (host.isConnected) anim.goToAndPlay(0, true); }, 1800 + Math.random() * 1500);
       });
     },
 
@@ -434,8 +458,16 @@
       $('#drum-actions').hidden = false;
     },
 
-    renderResult() {
-      const match = this.match;
+    async renderResult() {
+      let match = this.match;
+      if (!match && this.me && this.state.revealed) {
+        try {
+          match = await api(`/api/match?id=${encodeURIComponent(this.me.id)}&token=${encodeURIComponent(this.me.token)}`);
+          this.match = match;
+        } catch { /* nothing to show yet */ }
+      }
+      $('#result-name').textContent = match ? match.receiver.name : '\u2014';
+      $('#match-wishlist').replaceChildren();
       if (!match) return;
       $('#result-name').textContent = match.receiver.name;
 

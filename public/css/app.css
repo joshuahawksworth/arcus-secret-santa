@@ -545,14 +545,14 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
   overflow: hidden;
   flex: none;
   font-size: .19px;
-  width: 620em;
+  width: 1052em;
   height: 900em;
 }
 
 /* Offsets chosen so the window frames head, beard and shoulders: the beard
    hangs ~220em below the face, so the figure sits lower than the face alone
    would need. */
-.santa-figure { position: absolute; left: -215em; bottom: -80em; width: 1052em; height: 1000em; }
+.santa-figure { position: absolute; left: 0; bottom: -80em; width: 1052em; height: 1000em; }
 
 /* The scene centres the beard canvas on the face; its pixel size is set in JS
    from the computed `em`, so one canvas unit stays one scene unit. */
@@ -628,6 +628,12 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
   background: url(../img/face/mouth--breath.svg) 0 0/contain no-repeat;
   height: 57em; width: 57em;
   left: 250.5em;
+}
+.Face--breath .mouth, .mouth--breath {
+  background: url(../img/face/mouth--breath.svg) 0 0/contain no-repeat;
+  height: 40em; width: 40em;
+  left: 259em;
+  top: 303em;
 }
 .Face--sad .mouth { background: url(../img/face/mouth--smile.svg) 0 0/contain no-repeat; height: 45em; width: 90em; transform: scaleY(-1); }
 
@@ -724,7 +730,7 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
 }
 .chat-main { flex: 1 1 auto; min-width: 0; display: flex; flex-flow: column; max-height: 100%; }
 .chat-santa { flex: none; display: flex; align-items: flex-end; }
-.chat-santa .santa-window { font-size: .44px; margin-bottom: -8px; }
+.chat-santa .santa-window { font-size: .48px; margin-bottom: -8px; margin-right: -40px; }
 
 .chat-title { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; }
 .chat-title h1 { margin: 0 0 10px; text-align: left; }
@@ -1060,12 +1066,50 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
 .wishlist > dd { grid-column: 1 / -1; color: #fff; margin: 0; }
 .wishlist dd em { font-style: normal; opacity: .85; }
 
+/* --- dev tools ---------------------------------------------------------- */
+
+.devtools {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 9500;
+  width: min(420px, calc(100vw - 24px));
+  background: #202124;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12);
+  font: 12px/1.4 "Roboto", "Google Sans", Arial, sans-serif;
+  padding: 8px 10px 6px;
+  opacity: .96;
+}
+.devtools.hidden { display: none; }
+.devtools-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.devtools-head strong { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #3fc4ff; }
+.devtools-state { flex: 1; color: #bbb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.devtools-close { background: none; border: 0; color: #bbb; font-size: 18px; cursor: pointer; line-height: 1; padding: 0 4px; }
+.devtools-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin: 4px 0; }
+.devtools-row > span { width: 38px; color: #888; text-transform: uppercase; font-size: 10px; letter-spacing: .5px; }
+.devtools-row button, .devtools-row select {
+  background: transparent;
+  border: 1px solid rgba(63, 196, 255, .5);
+  color: #3fc4ff;
+  border-radius: 200px;
+  padding: 3px 9px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.devtools-row select { color: #fff; background: #303134; max-width: 190px; }
+.devtools-row button:hover { background: rgba(63, 196, 255, .2); }
+.devtools-log { margin-top: 6px; border-top: 1px solid #3a3b3e; padding-top: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: #aaa; max-height: 70px; overflow: hidden; }
+.devtools-log .err { color: #ff8a80; }
+
 /* --- responsive --------------------------------------------------------- */
 
 @media (max-width: 760px) {
   .chat-dialog { flex-flow: column; align-items: stretch; gap: 0; }
   .chat-santa { justify-content: flex-start; margin-bottom: -16px; margin-left: 6px; position: relative; z-index: 1; }
-  .chat-santa .santa-window { font-size: .19px; margin-bottom: 0; }
+  .chat-santa .santa-window { font-size: .2px; margin-bottom: 0; margin-right: 0; }
   .chat-title h1 { font-size: 30px; line-height: 30px; }
   .chat-log { max-height: 36vh; }
 }

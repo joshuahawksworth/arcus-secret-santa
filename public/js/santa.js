@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  const MOODS = ['happy', 'delighted', 'alarmed', 'sad', 'talking'];
+  const MOODS = ['happy', 'delighted', 'alarmed', 'sad', 'talking', 'breath'];
 
   /** Santa Tracker's utils.randomLoop: run fn on a random interval forever. */
   function randomLoop(fn, min, max, stillAlive) {
@@ -87,19 +87,21 @@
     get mood() { return this._mood; }
 
     /**
-     * Flaps the mouth open and shut for `duration` ms, then settles back into
-     * a smile. Used while a message of Santa's is being delivered.
+     * Works the mouth while a line of Santa's is delivered: it rounds between
+     * the scene's wide-open and small "breath" mouths (both round, so nothing
+     * jumps about), then settles back into a smile.
      */
     talk(duration = 900) {
       window.clearInterval(this._talkTimer);
-      const settled = this._mood === 'talking' ? 'happy' : this._mood;
+      window.clearTimeout(this._talkEnd);
+      const settled = (this._mood === 'talking' || this._mood === 'breath') ? 'happy' : this._mood;
       let open = true;
       this.mood = 'talking';
       this._talkTimer = window.setInterval(() => {
         open = !open;
-        this.mood = open ? 'talking' : settled;
-      }, 160);
-      window.setTimeout(() => {
+        this.mood = open ? 'talking' : 'breath';
+      }, 240);
+      this._talkEnd = window.setTimeout(() => {
         window.clearInterval(this._talkTimer);
         this._talkTimer = 0;
         this.mood = settled;
@@ -115,6 +117,7 @@
     destroy() {
       this._alive = false;
       window.clearInterval(this._talkTimer);
+      window.clearTimeout(this._talkEnd);
       window.removeEventListener('resize', this._onResize);
     }
   }
