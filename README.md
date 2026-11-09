@@ -8,6 +8,11 @@ back to find out who they're buying for.
 
 ## Running it
 
+Two ways: your own box with a JSON file, or Vercel with Blob storage. The
+code is the same either way; only the entry point and the store differ.
+
+### On a box
+
 No dependencies, no build step. Node 18 or newer:
 
 ```bash
@@ -35,6 +40,30 @@ All optional, all environment variables:
 ```bash
 PORT=8080 REVEAL_DATE=2026-12-01 ADMIN_TOKEN=some-long-secret npm start
 ```
+
+### On Vercel
+
+The repo deploys to Vercel as static files from `public/` plus one function,
+`api/index.js`, which every `/api/*` request is rewritten to (see
+`vercel.json`). Vercel's filesystem does not persist, so the pool lives in a
+**Vercel Blob** store instead:
+
+1. Create a Blob store and connect it to the project. That sets
+   `BLOB_READ_WRITE_TOKEN` on the project; nothing else is needed.
+2. Optionally add `REVEAL_DATE` and `ADMIN_TOKEN` as environment variables.
+3. Deploy. Pushes to the connected branch deploy automatically.
+
+Without a Blob store the function falls back to a file in `/tmp`, which only
+lasts as long as the warm instance does. Fine for a look round, not for the
+real thing.
+
+`lib/blobstore.js` keeps the whole pool as one JSON blob and talks to the Blob
+REST API directly, so the app stays dependency-free. Two people saving in the
+same instant could overwrite each other; for a team joining over a few weeks
+that is a fair trade.
+
+Vercel runs on UTC, so `REVEAL_DATE` (and the 1 December default) opens the
+drum at midnight UTC.
 
 ## How it works
 
@@ -114,23 +143,39 @@ curl -s -X POST localhost:3000/api/admin/reset -H "x-admin-token: $ADMIN_TOKEN" 
 `reset` clears the draw and lets people join again. Pass `{"emptyPool": true}`
 to also delete everyone.
 
+### The drum
+
+Nobody needs to know the headcount, so the names are shown as a raffle drum
+on the home page instead of a list: a reel of red and white tickets that flies
+up past a gold marker. Before the reveal date it sits out of service under a
+hazard banner with the Build & Bolt elf working on it. From the reveal date,
+anyone signed in can start the draw: the reel runs for a few seconds and stops
+on the name the server dealt them, then "What Santa knows about..." opens
+their answers and hint.
+
 ## Layout
 
 ```
-server.js            zero-dependency HTTP server and JSON API
+server.js            zero-dependency HTTP server (static files + the API)
+api/index.js         the same API as a Vercel function
+vercel.json          Vercel routing: public/ as static, /api/* to the function
+lib/api.js           the JSON API as a plain (req, res) handler
 lib/draw.js          Sattolo's algorithm + validation
-lib/store.js         the JSON file, read and written atomically
+lib/store.js         the pool in a JSON file, written atomically
+lib/blobstore.js     the pool in Vercel Blob, same interface
 test/draw.test.js    the draw's guarantees, under node --test
 public/
   index.html         the one page
   css/village.css    the village scene
-  css/app.css        shell, transitions, Santa, UI
+  css/app.css        shell, transitions, Santa, reel, UI
   css/fonts.css      Lobster, Google Sans, Roboto
   js/weather.js      falling snow and drifting clouds
   js/beard.js        Santa's beard, as a cloth simulation
   js/santa.js        Santa: blinking, breathing, talking
+  js/drum.js         the raffle drum reel
   js/chat.js         the questions, and the conversation engine
   js/app.js          screens, transitions, and the API client
+  vendor/            lottie_light, for the Build & Bolt elf
   img/ fonts/        artwork and fonts
 ```
 
@@ -165,8 +210,10 @@ source under Apache 2.0. Nothing here is generated artwork.
 * **The page transition** — the site's `santa-interlude`: four coloured layers
   sweep up over the screen in sequence, then carry on up and off, with the new
   screen rising in from the bottom.
-* **The buttons, dialogs, cards and badges** — the site's `#play` button,
-  `.uibutton`, `santa-overlay`, `santa-card`, `santa-badge` and `santa-notice`.
+* **The elf on the drum** — the Build & Bolt card animation from the
+  toymaking floor, played with lottie-web (as the site plays it).
+* **The buttons, dialogs, cards and notices** — the site's `#play` button,
+  `.uibutton`, `santa-overlay`, `santa-card` and `santa-notice`.
 * **The fonts** — Lobster, Google Sans and Roboto, the same three the site
   loads, self-hosted in `public/fonts/` so the app needs no network.
 
