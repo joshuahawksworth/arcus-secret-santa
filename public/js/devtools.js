@@ -96,7 +96,7 @@
       await this.app.refresh();
       const { state, me } = this.app;
       $('#devtools-state', this.panel).textContent =
-        `${state.count} in · ${state.revealed ? 'drum open' : 'locked'} · ${state.drawn ? 'drawn' : 'not drawn'} · ${me ? me.name : 'anonymous'}`;
+        `${state.count} in · ${state.poolOpen ? 'joining open' : 'joining closed'} · ${state.revealed ? 'drum open' : 'drum locked'} · ${state.drawn ? 'drawn' : 'not drawn'} · ${me ? me.name : 'anonymous'}`;
 
       const { people } = await call('/api/dev/people');
       const select = $('#devtools-person', this.panel);
@@ -152,11 +152,11 @@
         }
         case 'draw':
           await call('/api/dev/draw', {});
-          this.log('names redrawn');
+          this.log('names redrawn (drum opened too, since a draw closes joining)');
           break;
         case 'default':
           await call('/api/dev/reveal', { mode: 'default' });
-          this.log('reveal date back to the real one');
+          this.log('reveal date back to the real one; test draw cleared, joining open');
           break;
         case 'forget':
           this.app.forget();
