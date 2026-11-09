@@ -223,6 +223,13 @@ curl -s -X POST https://www.arcus-secret-santa.com/api/admin/draw -H "x-admin-to
 curl -s -X POST https://www.arcus-secret-santa.com/api/admin/reset -H "x-admin-token: $ADMIN_TOKEN" -H 'content-type: application/json' -d '{"emptyPool":false}'
 ```
 
+Take one person out (by name, or `{"id": "..."}`); refused once the names are
+drawn, so reset first if you really mean it:
+
+```bash
+curl -s -X POST https://www.arcus-secret-santa.com/api/admin/remove -H "x-admin-token: $ADMIN_TOKEN" -H 'content-type: application/json' -d '{"name":"Wayne"}'
+```
+
 `reset` clears the draw and lets people join again. Pass `{"emptyPool": true}`
 to also delete everyone.
 
