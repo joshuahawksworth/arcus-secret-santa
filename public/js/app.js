@@ -336,6 +336,8 @@
       $('#chat-send').hidden = false;
       $('#chat-input').hidden = false;
       $('#chat-restart').hidden = true;
+      $('#chat-continue').hidden = true;
+      $('#chat-continue').disabled = false;
       this.notice('chat', '');
 
       if (this.santa) this.santa.destroy();
@@ -346,6 +348,7 @@
         input: $('#chat-input'),
         sendButton: $('#chat-send'),
         skipButton: $('#chat-skip'),
+        continueButton: $('#chat-continue'),
         chips: $('#chat-chips'),
         progress: $('#chat-progress'),
         santa: this.santa,
@@ -358,6 +361,7 @@
       $('#chat-input').hidden = true;
       $('#chat-send').hidden = true;
       $('#chat-skip').hidden = true;
+      $('#chat-continue').hidden = true;
       try {
         const person = await api('/api/join', { method: 'POST', body: result });
         this.me = person;
@@ -366,6 +370,7 @@
       } catch (err) {
         this.notice('chat', err.message);
         $('#chat-restart').hidden = false;
+        // e.g. the name is taken: let them go back and answer again.
       }
     },
 

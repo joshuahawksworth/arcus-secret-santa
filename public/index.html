@@ -7,9 +7,9 @@
 <meta name="description" content="Put your name in the hat, tell Santa what you are into, and find out who you are buying for on the 1st of December.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="img/village/tree.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/fonts.css?v=10">
-<link rel="stylesheet" href="css/village.css?v=10">
-<link rel="stylesheet" href="css/app.css?v=10">
+<link rel="stylesheet" href="css/fonts.css?v=11">
+<link rel="stylesheet" href="css/village.css?v=11">
+<link rel="stylesheet" href="css/app.css?v=11">
 </head>
 <body class="booting">
 
@@ -81,6 +81,9 @@
            date it is out of service, with an elf working on it. -->
       <div class="reel-wrap" id="drum-wrap">
         <div class="notice"><p></p></div>
+        <div class="reel-frame">
+        <!-- The underside of the ribbon: the ends that run round behind the drum. -->
+        <div class="drum-ribbon-back" aria-hidden="true"><div class="drum-lock-banner back"></div></div>
         <div class="reel" id="drum">
           <div class="reel-window" id="drum-tickets" aria-live="off"></div>
           <div class="reel-focus" id="drum-focus" aria-hidden="true"></div>
@@ -98,6 +101,7 @@
         </div>
         <!-- The Build & Bolt elf from the toymaking floor, spanner in hand. -->
         <div class="reel-elf" id="reel-elf" aria-hidden="true"></div>
+        </div>
         <div class="reel-actions" id="drum-actions" hidden>
           <button class="uibutton gold" id="drum-spin" type="button">Start the draw</button>
           <button class="uibutton" id="drum-details" data-go="result" type="button" hidden>What Santa knows</button>
@@ -133,6 +137,7 @@
               <button class="uibutton ghost small" id="chat-skip" type="button" hidden>Skip</button>
             </div>
             <div class="dialog-actions">
+              <button class="uibutton red" id="chat-continue" type="button" hidden>Continue</button>
               <button class="uibutton gold" id="chat-restart" type="button" hidden>Start again</button>
             </div>
           </div>
@@ -263,13 +268,13 @@
   <div class="layer layer-3"></div>
 </div>
 
-<script src="vendor/lottie_light.min.js?v=10"></script>
-<script src="js/weather.js?v=10"></script>
-<script src="js/beard.js?v=10"></script>
-<script src="js/santa.js?v=10"></script>
-<script src="js/drum.js?v=10"></script>
-<script src="js/chat.js?v=10"></script>
-<script src="js/devtools.js?v=10"></script>
-<script src="js/app.js?v=10"></script>
+<script src="vendor/lottie_light.min.js?v=11"></script>
+<script src="js/weather.js?v=11"></script>
+<script src="js/beard.js?v=11"></script>
+<script src="js/santa.js?v=11"></script>
+<script src="js/drum.js?v=11"></script>
+<script src="js/chat.js?v=11"></script>
+<script src="js/devtools.js?v=11"></script>
+<script src="js/app.js?v=11"></script>
 </body>
 </html>

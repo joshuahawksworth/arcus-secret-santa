@@ -126,7 +126,7 @@
   class SantaChat {
     /**
      * @param {object} opts
-     *   log, input, sendButton, skipButton, chips, progress  DOM elements
+     *   log, input, sendButton, skipButton, continueButton, chips, progress  DOM elements
      *   santa      a Santa instance to animate while talking
      *   onFinish   called with { name, hint, answers: [{key, q, a}] }
      */
@@ -300,18 +300,35 @@
       }
     }
 
+    /**
+     * Santa signs off, then waits: the person reads at their own pace and
+     * presses Continue when they are ready to be put in the hat.
+     */
     async finish() {
       this._lock(true);
       this.el.skipButton.hidden = true;
       this.el.chips.replaceChildren();
+      this.el.input.hidden = true;
+      this.el.sendButton.hidden = true;
       for (const line of CLOSING) await this.say(line);
       if (this.santa) this.santa.delight(2400);
       this.el.progress.style.width = '100%';
-      this.onFinish({
+
+      const result = {
         name: this.result.name,
         hint: this.result.hint,
         answers: this.result.answers.filter((a) => a.a.trim()),
-      });
+      };
+      if (this.el.continueButton) {
+        this.el.continueButton.hidden = false;
+        this.el.continueButton.focus();
+        this.el.continueButton.addEventListener('click', () => {
+          this.el.continueButton.disabled = true;
+          this.onFinish(result);
+        }, { once: true });
+      } else {
+        this.onFinish(result);
+      }
     }
   }
 

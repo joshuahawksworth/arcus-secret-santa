@@ -995,15 +995,33 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   white-space: nowrap;
 }
 
-/* Out of service: the reel dims and a hazard-striped banner runs diagonally
-   across it, in the site's gold. */
+/* Out of service: the reel dims and a hazard-striped ribbon wraps round it.
+   The front of the ribbon lives inside the reel (clipped to its face); the
+   ends live behind the reel, poking out either side, in a darker gold so they
+   read as the underside. Both share one angle and centre, so they line up. */
+.reel-frame { position: relative; }
+.reel-frame .reel { position: relative; z-index: 1; }
+
 .reel.locked .reel-window { filter: brightness(.9); }
 .reel.locked .reel-marker { opacity: .3; }
-.drum-lock { display: none; position: absolute; inset: 0; z-index: 7; align-items: center; justify-content: center; pointer-events: none; overflow: hidden; }
-.reel.locked .drum-lock { display: flex; }
+
+.drum-lock, .drum-ribbon-back {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.drum-lock { z-index: 7; overflow: hidden; }
+.drum-ribbon-back { z-index: 0; }
+.reel.locked .drum-lock, .reel-frame:has(.reel.locked) .drum-ribbon-back { display: flex; }
+
 .drum-lock-banner {
+  --ribbon-angle: -12deg;
+  flex: none;              /* keep the stated width; a flex item would shrink to fit */
   width: 160%;
-  transform: rotate(-12deg);
+  transform: rotate(var(--ribbon-angle));
   background: #f9c329;
   color: #4a3200;
   font-weight: 800;
@@ -1019,6 +1037,17 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+/* The underside: the same strip, shorter, darker, no text, with forked tails. */
+.drum-lock-banner.back {
+  width: 124%;
+  height: calc(14px + 22px + 1.4em);     /* borders + padding + a line of text */
+  padding: 0;
+  background: #d9a314;
+  border-image: repeating-linear-gradient(-45deg, #3a2700 0 12px, #d9a314 12px 24px) 7;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, .35);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 50%, 100% 100%, 0 100%, 14px 50%);
 }
 
 /* The Build & Bolt elf, working on the drum's corner. */
@@ -1141,6 +1170,7 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   .reel-winner-box { padding: 8px 18px; }
   .reel-elf { width: 112px; right: -14px; bottom: -10px; }
   .drum-lock-banner { font-size: 11px; letter-spacing: 1px; padding: 8px 0; }
+  .drum-lock-banner.back { height: calc(14px + 16px + 1.4em); }
   .wishlist { grid-template-columns: 1fr; }
   .drum-lock-ribbon { font-size: 11px; padding: 8px 16px; }
 }
