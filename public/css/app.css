@@ -397,7 +397,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
   margin: 1em 0 0;
   transition: opacity .4s, transform .4s;
@@ -478,6 +478,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   font-size: 13px;
 }
 .linkbutton:hover { background: rgba(255, 255, 255, .2); }
+
+/* The brief "Saved!" confirmation beside the Save button. */
+.saved { color: #f9c329; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; text-shadow: 0 1px 0 rgba(0, 0, 0, .2); }
 .dialog > .dialog-actions .linkbutton, .chat-head .linkbutton { text-shadow: 0 1px 2px rgba(0, 0, 0, .5); }
 .linkbutton:focus-visible { border-color: rgba(255, 255, 255, .5); outline: none; }
 
@@ -687,6 +690,9 @@ button.card:focus-visible { outline: none; box-shadow: 0 0 12px 4px #fff; }
   pointer-events: none;
 }
 .topbar > * { pointer-events: auto; position: relative; }
+.topbar .uibutton.small { font-size: 12px; padding: 6px 13px; --height: 4px; }
+/* No point offering "My answers" while you are already looking at them. */
+body[data-screen="profile"] .topbar #home-profile { display: none; }
 
 @media (max-width: 767px) {
   .topbar { border-top: 10px solid transparent; padding-left: 10px; padding-right: 10px; }

@@ -57,7 +57,9 @@
   </div>
 </div>
 
-<div class="topbar" aria-hidden="true"></div>
+<div class="topbar">
+  <button class="uibutton ghost small" id="home-profile" data-go="profile" type="button" hidden>My answers</button>
+</div>
 
 <div id="screens">
 
@@ -72,7 +74,6 @@
       <div class="home-actions">
         <button class="playbutton" id="home-join" data-go="chat" type="button"><span>Join the<br>pool</span></button>
         <button class="playbutton green" id="home-signin" data-go="signin" type="button"><span>I&rsquo;ve been<br>here before</span></button>
-        <button class="playbutton green" id="home-profile" data-go="profile" type="button" hidden><span>My<br>answers</span></button>
       </div>
 
       <!-- The drum, seen from the front: a reel of tickets flies up past the
@@ -118,7 +119,7 @@
         <div class="chat-main">
           <div class="chat-title">
             <h1>Ask Santa</h1>
-            <button class="linkbutton" data-go="home" type="button">Close</button>
+            <button class="uibutton ghost small" data-go="home" type="button">Close</button>
           </div>
           <div class="sheet">
             <div class="notice"><p></p></div>
@@ -129,7 +130,7 @@
               <label class="visually-hidden" for="chat-input">Your answer</label>
               <textarea id="chat-input" rows="1" data-autofocus placeholder="Type your answer" autocomplete="off"></textarea>
               <button class="uibutton red" id="chat-send" type="button">Send</button>
-              <button class="linkbutton" id="chat-skip" type="button" hidden>Skip</button>
+              <button class="uibutton ghost small" id="chat-skip" type="button" hidden>Skip</button>
             </div>
             <div class="dialog-actions">
               <button class="uibutton gold" id="chat-restart" type="button" hidden>Start again</button>
@@ -149,17 +150,17 @@
         <div class="sheet">
           <h4>Keep this safe</h4>
           <p><strong id="joined-name"></strong> is in the hat.</p>
-          <p class="quiet">This is your elf code. You&rsquo;ll need it to get back to your answers
+          <p class="quiet">This is your code. You&rsquo;ll need it to get back in
              on another device, or if you clear your browser. Tap it to copy.</p>
           <div class="codebox">
-            <label class="visually-hidden" for="joined-code">Your elf code</label>
+            <label class="visually-hidden" for="joined-code">Your code</label>
             <input type="text" id="joined-code" readonly data-autofocus>
           </div>
           <p class="quiet" id="joined-when"></p>
         </div>
         <div class="dialog-actions">
-          <button class="uibutton green" data-go="profile" type="button">My answers</button>
-          <button class="linkbutton" data-go="home" type="button">Done</button>
+          <button class="uibutton red" data-go="profile" type="button">My answers</button>
+          <button class="uibutton" data-go="home" type="button">Done</button>
         </div>
       </div>
     </div>
@@ -172,10 +173,10 @@
         <h1>Welcome back</h1>
         <form class="sheet" id="join-form">
           <div class="notice"><p></p></div>
-          <h4>Your elf code</h4>
+          <h4>Your code</h4>
           <p class="quiet">The six characters Santa gave you when you joined.</p>
           <div class="field code">
-            <label for="signin-code">Elf code</label>
+            <label for="signin-code">Code</label>
             <input type="text" id="signin-code" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" data-autofocus>
           </div>
           <div class="field">
@@ -183,8 +184,8 @@
             <input type="text" id="signin-name" autocomplete="name" placeholder="Optional, but it helps">
           </div>
           <div class="dialog-actions">
-            <button class="uibutton green" type="submit">Sign in</button>
-            <button class="linkbutton" data-go="home" type="button">Back</button>
+            <button class="uibutton red" type="submit">Sign in</button>
+            <button class="uibutton" data-go="home" type="button">Back</button>
           </div>
         </form>
       </div>
@@ -228,7 +229,7 @@
               <div class="sub">This is the first thing your Secret Santa sees.</div>
             </div>
             <div class="field">
-              <label for="profile-code">Your elf code</label>
+              <label for="profile-code">Your code</label>
               <div class="codebox">
                 <input type="text" id="profile-code" readonly>
               </div>
@@ -236,15 +237,15 @@
             </div>
           </div>
           <div class="dialog-actions">
-            <button class="uibutton green" type="submit">Save</button>
-            <span id="profile-saved" class="linkbutton" hidden>Saved!</span>
-            <button class="linkbutton" data-go="home" type="button">Back</button>
+            <button class="uibutton red" type="submit">Save</button>
+            <button class="uibutton" data-go="home" type="button">Back</button>
+            <span id="profile-saved" class="saved" hidden>Saved!</span>
           </div>
           <p class="quiet" id="profile-locked" hidden>The names have been drawn, so you can&rsquo;t take
              yourself out now &mdash; but you can still tidy up your answers.</p>
           <div class="dialog-actions">
-            <button class="linkbutton" id="leave" type="button">Leave the pool</button>
-            <button class="linkbutton" id="forget" type="button">Forget me on this device</button>
+            <button class="uibutton ghost small" id="leave" type="button">Leave the pool</button>
+            <button class="uibutton ghost small" id="forget" type="button">Forget me on this device</button>
           </div>
         </form>
       </div>

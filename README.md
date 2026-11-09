@@ -81,12 +81,12 @@ form on the "My answers" screen.
 
 ### Remembering people
 
-Joining returns an **elf code**: six characters, shown on the "You're in"
+Joining returns an **code**: six characters, shown on the "You're in"
 screen and again under "My answers".
 
 * The browser remembers whoever joined on it, so coming back is automatic.
 * On another device, or after clearing the browser, "I've been here before"
-  takes a name and elf code and picks the profile back up.
+  takes a name and code and picks the profile back up.
 * Answers and the hint can be changed at any time, before or after the draw.
   Whoever drew that person always sees the latest version.
 
@@ -201,7 +201,7 @@ public/
 | | |
 | --- | --- |
 | `GET /api/state` | headcount, reveal date, whether the names are drawn |
-| `POST /api/join` | `{name, hint, answers}` → the new person, with token and elf code |
+| `POST /api/join` | `{name, hint, answers}` → the new person, with token and code |
 | `POST /api/signin` | `{name, code}` → that person, with their token |
 | `GET /api/me` | `?id=&token=` → the saved profile |
 | `POST /api/me` | `{id, token, name?, hint?, answers?}` → the updated profile |

@@ -223,6 +223,7 @@
       for (const screen of $$('.screen')) screen.classList.remove('current', 'leaving');
       next.classList.add('current');
       this.screen = name;
+      document.body.dataset.screen = name;
       const focusable = $('[data-autofocus]', next);
       if (focusable) window.setTimeout(() => focusable.focus(), 450);
     },
@@ -374,7 +375,7 @@
       const name = $('#signin-name').value.trim();
       const code = $('#signin-code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
       this.notice('signin', '');
-      if (!code) return this.notice('signin', 'Please enter your elf code.');
+      if (!code) return this.notice('signin', 'Please enter your code.');
       try {
         const person = await api('/api/signin', { method: 'POST', body: { name, code } });
         this.me = person;
@@ -411,7 +412,7 @@
 
       this.drum.setLocked(false);
       if (!this.me) {
-        this.notice('home', 'Sign in with your elf code and the drum will draw your name.');
+        this.notice('home', 'Sign in with your code and the drum will draw your name.');
       } else if (!drawn || !names.length) {
         this.notice('home', 'Not enough people in the hat to draw yet.');
       } else {
@@ -563,7 +564,7 @@
     },
 
     onForget() {
-      if (!window.confirm('Forget you on this device? You will need your elf code to get back in. Your name stays in the hat.')) return;
+      if (!window.confirm('Forget you on this device? You will need your code to get back in. Your name stays in the hat.')) return;
       identity.clear();
       this.me = null;
       this.go('home', () => this.prepare('home'));
