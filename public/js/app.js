@@ -352,6 +352,7 @@
         chips: $('#chat-chips'),
         progress: $('#chat-progress'),
         santa: this.santa,
+        when: this.state.revealDate ? formatDate(this.state.revealDate) : null,
         onFinish: (result) => this.onJoin(result),
       });
       this.chat.start();

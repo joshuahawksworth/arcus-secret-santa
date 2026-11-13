@@ -110,7 +110,7 @@
 
   const CLOSING = [
     'That is everything, {name}!',
-    'Your name is in the sack with the others. On the 1st of December I will tell you who you are buying for.',
+    'Your name is in the sack with the others. On {when} I will tell you who you are buying for.',
   ];
 
   const SKIPPED = ['Not to worry.', 'Fair enough, we shall leave that one blank.'];
@@ -134,6 +134,7 @@
       this.el = opts;
       this.santa = opts.santa;
       this.onFinish = opts.onFinish || (() => {});
+      this.when = opts.when || 'the big day';   // the reveal date, as Santa says it
       this.step = 0;
       this.result = { name: '', hint: '', answers: [] };
       this._busy = false;
@@ -186,7 +187,7 @@
 
     /** Shows the typing dots, then replaces them with the line. */
     async say(text) {
-      const line = fill(text, this.result);
+      const line = fill(text, { ...this.result, when: this.when });
       const dots = this.typing();
       const thinking = Math.min(900, 260 + line.length * 12);
       // Santa's mouth goes the whole time, from the typing dots to the end of the line.

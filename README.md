@@ -3,14 +3,14 @@
 An internal Secret Santa for the team. One snowy village, no scrolling, and a
 Santa who asks you what you're into before putting your name in the hat.
 
-On the 1st of December the hat closes, the names are drawn, and everyone comes
-back to find out who they're buying for.
+On the reveal date (this year, 23 November) the hat closes, the names are
+drawn, and everyone comes back to find out who they're buying for.
 
 **Live at [www.arcus-secret-santa.com](https://www.arcus-secret-santa.com)**
 
 ## What it looks like
 
-The village, with the raffle drum out of service until 1 December and the
+The village, with the raffle drum out of service until the reveal date and the
 Build & Bolt elf working on it:
 
 ![The home screen: a snowy village, two round buttons, and a hazard-taped raffle drum](docs/home.png)
@@ -63,7 +63,7 @@ All optional, all environment variables:
 | --- | --- | --- |
 | `PORT` | `3000` | Port to listen on |
 | `HOST` | `0.0.0.0` | Interface to bind |
-| `REVEAL_DATE` | 1 December of the current year | `YYYY-MM-DD`, midnight server time |
+| `REVEAL_DATE` | 1 December of the current year | `YYYY-MM-DD`, midnight server time. Set to `2026-11-23` on Vercel. |
 | `DATA_FILE` | `data/pool.json` | Where the pool is stored |
 | `ADMIN_TOKEN` | *(unset)* | Enables the admin endpoints below. Leave unset and they stay off. |
 | `DEV_TOOLS` | *(unset)* | `1` enables the `?dev` panel and its endpoints. Testing only. |
@@ -197,15 +197,25 @@ the site could reset the pool otherwise. The preview deployment has it on.
 
 ### Backups
 
-`scripts/backup.sh` saves everything in the pool (names, codes, answers,
-hints and, after the draw, the assignments) to a timestamped JSON file:
+`scripts/backup.sh` saves everything in the pool (names, codes, sign-in
+tokens, answers, hints and, after the draw, the assignments) to a timestamped
+JSON file, via `GET /api/admin/export`:
 
 ```bash
 ADMIN_TOKEN=your-token ./scripts/backup.sh ~/Desktop
 ```
 
-Run it now and then, and certainly on 1 December. The files hold everyone's
-sign-in codes, so keep them private; `backups/` in the repo is git-ignored.
+`scripts/restore.sh` puts one back, replacing whatever is there now (it takes
+a fresh backup of the current pool first). Because the tokens come back too,
+nobody is signed out:
+
+```bash
+ADMIN_TOKEN=your-token ./scripts/restore.sh backups/pool-20261113-124500.json
+```
+
+Run a backup now and then, and certainly on the reveal date. The files let
+whoever holds them sign in as anyone in them, so keep them private;
+`backups/` in the repo is git-ignored.
 
 ### Admin
 
