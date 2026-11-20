@@ -3,7 +3,7 @@
 An internal Secret Santa for the team. One snowy village, no scrolling, and a
 Santa who asks you what you're into before putting your name in the hat.
 
-On the reveal date (this year, 23 November) the hat closes, the names are
+On the reveal date (this year, 27 November) the hat closes, the names are
 drawn, and everyone comes back to find out who they're buying for.
 
 **Live at [www.arcus-secret-santa.com](https://www.arcus-secret-santa.com)**
@@ -63,7 +63,7 @@ All optional, all environment variables:
 | --- | --- | --- |
 | `PORT` | `3000` | Port to listen on |
 | `HOST` | `0.0.0.0` | Interface to bind |
-| `REVEAL_DATE` | 1 December of the current year | `YYYY-MM-DD`, midnight server time. Set to `2026-11-23` on Vercel. |
+| `REVEAL_DATE` | 1 December of the current year | `YYYY-MM-DD`, midnight server time. Set to `2026-11-27` on Vercel. |
 | `DATA_FILE` | `data/pool.json` | Where the pool is stored |
 | `ADMIN_TOKEN` | *(unset)* | Enables the admin endpoints below. Leave unset and they stay off. |
 | `DEV_TOOLS` | *(unset)* | `1` enables the `?dev` panel and its endpoints. Testing only. |
