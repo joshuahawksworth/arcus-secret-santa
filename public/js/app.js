@@ -17,9 +17,23 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
+  /**
+   * "27 November", or "27 November at 3pm" when the reveal isn't at midnight.
+   * Always in UK time, so everyone sees the same moment however their own
+   * computer's clock is set.
+   */
   function formatDate(iso) {
     const date = new Date(iso);
-    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+    const zone = 'Europe/London';
+    const day = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: zone });
+    const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+      hour: 'numeric', minute: '2-digit', hourCycle: 'h23', timeZone: zone,
+    }).formatToParts(date).map((p) => [p.type, p.value]));
+    const h = Number(parts.hour), m = Number(parts.minute);
+    if (h === 0 && m === 0) return day;
+    const hour12 = h % 12 || 12;
+    const time = `${hour12}${m ? ':' + String(m).padStart(2, '0') : ''}${h < 12 ? 'am' : 'pm'}`;
+    return `${day} at ${time}`;
   }
 
   // --- the village stage ----------------------------------------------------
