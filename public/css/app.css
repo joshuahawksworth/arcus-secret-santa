@@ -864,6 +864,7 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   position: relative;
   width: 100%;
   height: clamp(170px, 26vh, 250px);
+  transition: height .4s cubic-bezier(0.215, 0.61, 0.355, 1);
   border-radius: 18px;
   background: #136a3b;
   box-shadow: 0 10px 0 rgba(0, 0, 0, .14), 0 18px 40px rgba(0, 0, 0, .3), inset 0 0 0 4px #1a844b;
@@ -1016,6 +1017,19 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   pointer-events: none;
 }
 .reel.done .reel-winner { opacity: 1; transform: none; }
+
+/* Once it lands, the intro line under the title fades out and the drum grows
+   into its space, so the label, the name (two lines if it is long) and the
+   budget all clear the candy-cane rails, even on a short laptop screen. */
+.titleblock > p { transition: opacity .3s, max-height .4s, margin .4s, padding .4s; max-height: 6em; overflow: hidden; }
+#screen-home.revealed .titleblock > p { opacity: 0; max-height: 0; margin: 0; padding-bottom: 0; }
+.reel.done { height: clamp(236px, 30vh, 280px); }
+@media (max-height: 760px) {
+  .reel-winner { gap: 6px; padding: 14px 20px; }
+  .reel-winner-box { padding: 6px 24px; font-size: clamp(26px, 4vw, 38px); }
+  .reel-winner-box.long { font-size: clamp(20px, 2.8vw, 28px); padding: 6px 18px; }
+  .budget-tag { margin-top: 4px; padding: 4px 14px; font-size: 14px; }
+}
 /* A long name (with a role or note in brackets, say) wraps to two lines at a
    smaller size, so none of it is lost at the big moment. */
 .reel-winner-box.long {

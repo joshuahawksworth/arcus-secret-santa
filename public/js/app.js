@@ -424,6 +424,7 @@
 
       this.notice('home', '');
       $('#drum').classList.remove('done');
+      $('#screen-home').classList.remove('revealed');
       $('#drum-spin').disabled = false;
       $('#drum-spin').hidden = false;
       $('#drum-details').hidden = true;
@@ -484,6 +485,7 @@
       $('#match-name').classList.toggle('long', match.receiver.name.length > 16);
       // The reel blurs back and the winner's box comes forward, as on a real draw.
       $('#drum').classList.add('done');
+      $('#screen-home').classList.add('revealed');   // the intro steps aside for the result
       $('#drum-details').textContent = `What Santa knows about ${match.receiver.name}`;
       $('#drum-details').hidden = false;
       $('#drum-actions').hidden = false;
