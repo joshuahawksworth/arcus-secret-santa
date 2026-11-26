@@ -957,6 +957,15 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   white-space: nowrap;
 }
 .ticket.winner { background: #f9c329; color: #4a3200; }
+/* A name too long for one line even at the smallest size wraps to two. */
+.ticket.wrap span {
+  white-space: normal;
+  text-overflow: clip;
+  text-align: center;
+  line-height: 1.1;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
 
 /* The centre window: two gold rails the width of the drum and a pointer
    each side, in the site's gold. */
@@ -1007,6 +1016,18 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   pointer-events: none;
 }
 .reel.done .reel-winner { opacity: 1; transform: none; }
+/* A long name (with a role or note in brackets, say) wraps to two lines at a
+   smaller size, so none of it is lost at the big moment. */
+.reel-winner-box.long {
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  text-align: center;
+  font-size: clamp(22px, 3.6vw, 34px);
+  line-height: 1.15;
+  padding: 10px 24px;
+  max-width: 92%;
+}
 .reel-winner-label { color: #fff; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; font-weight: 800; text-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
 .reel-winner-box {
   background: #1a844b;
@@ -1147,6 +1168,8 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
 
 .result-label { color: #fff; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; font-weight: 800; text-shadow: 0 1px 0 rgba(0, 0, 0, .3); margin-bottom: 4px; }
 .dialog > #result-name { font-size: clamp(44px, 8vw, 72px); line-height: 1; transform: rotateZ(-3deg) skew(-4deg); margin-bottom: 18px; }
+/* Long names at a size that keeps them to two lines, even on a small phone. */
+.dialog > #result-name.long { font-size: clamp(28px, 5vw, 52px); line-height: 1.1; }
 .sheet.result { max-height: min(56vh, 480px); overflow-y: auto; }
 .result h4 { margin-top: 2px; }
 
@@ -1247,6 +1270,8 @@ body[data-screen="profile"] .topbar #home-profile { display: none; }
   /* Once it lands, the drum grows enough for the name and the budget. */
   .reel { transition: height .4s cubic-bezier(0.215, 0.61, 0.355, 1); }
   .reel.done { height: 250px; }
+  .reel.done:has(.reel-winner-box.long) { height: 280px; }
+  .reel-winner-box.long { font-size: 22px; padding: 8px 14px; }
   .reel-winner { gap: 6px; padding: 16px 12px; }
   .budget-tag { margin-top: 6px; font-size: 14px; }
   .budget-note { gap: 10px; padding: 8px 12px; font-size: 13px; }

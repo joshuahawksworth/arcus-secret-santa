@@ -480,6 +480,8 @@
     showMatch(match) {
       this.match = match;
       $('#match-name').textContent = match.receiver.name;
+      // Long names wrap onto two lines at a smaller size instead of being cut off.
+      $('#match-name').classList.toggle('long', match.receiver.name.length > 16);
       // The reel blurs back and the winner's box comes forward, as on a real draw.
       $('#drum').classList.add('done');
       $('#drum-details').textContent = `What Santa knows about ${match.receiver.name}`;
@@ -497,6 +499,7 @@
       }
       $('#result-name').textContent = match ? match.receiver.name : '\u2014';
       $('#match-wishlist').replaceChildren();
+      $('#result-name').classList.toggle('long', Boolean(match) && match.receiver.name.length > 16);
       if (!match) return;
       $('#result-name').textContent = match.receiver.name;
 

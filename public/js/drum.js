@@ -97,7 +97,41 @@
         this.ticketH = sample.el.offsetHeight;
         this.pitch = this.ticketH + gap;
       }
+      this._fitLabels();
       this._render();
+    }
+
+    /**
+     * Shrinks the text of any name too long for its ticket until it fits,
+     * rather than cutting it off; the "…" only shows below a readable minimum.
+     */
+    _fitLabels() {
+      const MIN = 11;
+      for (const { el, focus } of this.strip) {
+        const span = el.firstElementChild;
+        const focusSpan = focus && focus.firstElementChild;
+        span.style.fontSize = '';
+        if (focusSpan) focusSpan.style.fontSize = '';
+        el.classList.remove('wrap');
+        if (focus) focus.classList.remove('wrap');
+        const room = span.clientWidth, need = span.scrollWidth;
+        if (!room || need <= room + 1) continue;
+        // A first guess from the ratio, then nudge down: letter-spacing doesn't
+        // scale with the font, so the ratio alone can leave it a few px over.
+        let size = Math.max(MIN, Math.floor(parseFloat(window.getComputedStyle(span).fontSize) * (room / need) * 10) / 10);
+        span.style.fontSize = `${size}px`;
+        while (size > MIN && span.scrollWidth > span.clientWidth + 1) {
+          size = Math.max(MIN, size - 0.5);
+          span.style.fontSize = `${size}px`;
+        }
+        // Still too long at the smallest readable size (a narrow phone): let it
+        // take two lines on its ticket instead.
+        if (span.scrollWidth > span.clientWidth + 1) {
+          el.classList.add('wrap');
+          if (focus) focus.classList.add('wrap');
+        }
+        if (focusSpan) focusSpan.style.fontSize = `${size}px`;
+      }
     }
 
     get length() { return this.strip.length * this.pitch; }
